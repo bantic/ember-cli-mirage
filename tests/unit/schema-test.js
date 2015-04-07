@@ -65,15 +65,20 @@ test('it returns an empty array when no models exist', function(assert) {
   assert.equal(users.length, 0);
 });
 
+var schema;
+var User = Model.extend();
+module('mirage:schema#find', {
+  beforeEach: function() {
+    var db = new Db();
+    db.createCollection('users');
+    db.users.insert([{id: 1, name: 'Link'}, {id: 2, name: 'Zelda'}]);
+    schema = new Schema(db);
+
+    schema.register('user', User);
+  }
+});
+
 test('it can find a model by id', function(assert) {
-  var db = new Db();
-  db.createCollection('users');
-  db.users.insert([{id: 1, name: 'Link'}, {id: 2, name: 'Zelda'}]);
-  var schema = new Schema(db);
-
-  var User = Model.extend();
-  schema.register('user', User);
-
   var zelda = schema.user.find(2);
 
   assert.ok(zelda instanceof User);
@@ -81,14 +86,6 @@ test('it can find a model by id', function(assert) {
 });
 
 test('it can find multiple models by ids', function(assert) {
-  var db = new Db();
-  db.createCollection('users');
-  db.users.insert([{id: 1, name: 'Link'}, {id: 2, name: 'Zelda'}]);
-  var schema = new Schema(db);
-
-  var User = Model.extend();
-  schema.register('user', User);
-
   var users = schema.user.find([1, 2]);
 
   assert.ok(users[0] instanceof User);
@@ -97,27 +94,44 @@ test('it can find multiple models by ids', function(assert) {
 });
 
 test('it returns null if no model is found for an id', function(assert) {
-  var db = new Db();
-  db.createCollection('users');
-  var schema = new Schema(db);
-
-  var User = Model.extend();
-  schema.register('user', User);
-
-  var user = schema.user.find(1);
+  var user = schema.user.find(4);
 
   assert.equal(user, null);
 });
 
 test('it returns an empty array if no model is found for an array of ids', function(assert) {
-  var db = new Db();
-  db.createCollection('users');
-  var schema = new Schema(db);
+  var users = schema.user.find([5, 6]);
 
-  var User = Model.extend();
-  schema.register('user', User);
+  assert.deepEqual(users, []);
+});
 
-  var users = schema.user.find([1, 2]);
+var schema;
+var User = Model.extend();
+module('mirage:schema#where', {
+  beforeEach: function() {
+    var db = new Db();
+    db.createCollection('users');
+    db.users.insert([
+      {id: 1, name: 'Link', good: true},
+      {id: 2, name: 'Zelda', good: true},
+      {id: 3, name: 'Ganon', good: false}
+    ]);
+    schema = new Schema(db);
+
+    schema.register('user', User);
+  }
+});
+
+test('it returns models that match a query with where', function(assert) {
+  var users = schema.user.where({good: false});
+
+  assert.equal(users.length, 1);
+  assert.ok(users[0] instanceof User);
+  assert.deepEqual(users[0].attrs, {id: 3, name: 'Ganon', good: false});
+});
+
+test('it returns an empty array if no models match a query', function(assert) {
+  var users = schema.user.where({name: 'Link', good: false});
 
   assert.deepEqual(users, []);
 });

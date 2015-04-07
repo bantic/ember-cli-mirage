@@ -32,7 +32,8 @@ export default function(db) {
     this[type] = {
       create: this._create.bind(this, type),
       all: this._all.bind(this, type),
-      find: this._find.bind(this, type)
+      find: this._find.bind(this, type),
+      where: this._where.bind(this, type)
     };
 
     return this;
@@ -82,6 +83,20 @@ export default function(db) {
     } else {
       return !records ? null : new ModelClass(records);
     }
+  },
+
+  this._where = function(type, query) {
+    var collection = pluralize(type);
+    if (!db[collection]) {
+      return null;
+    }
+
+    var ModelClass = this._registry[type];
+    var records = db[collection].where(query);
+
+    return !records ? [] : records.map(function(record) {
+      return new ModelClass(record);
+    });
   }
 
 
