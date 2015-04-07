@@ -155,6 +155,12 @@ test('returns a record whose id is a string that start with numbers', function(a
   assert.deepEqual(contact, {id: '123-456', name: 'Epona'});
 });
 
+test('returns multiple record that matche an arrya of ids', function(assert) {
+  var contacts = db.contacts.find([1, 2]);
+
+  assert.deepEqual(contacts, [{id: 1, name: 'Zelda'}, {id: 2, name: 'Link'}]);
+});
+
 
 module('mirage:db#where', {
   beforeEach: function() {
