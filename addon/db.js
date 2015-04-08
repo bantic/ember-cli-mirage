@@ -101,9 +101,8 @@ export default function() {
     return records;
   };
 
-  this._update = function(collection, target, attrs) {
-    if (typeof attrs === 'undefined') {
-      attrs = target;
+  this._update = function(collection, attrs, target) {
+    if (typeof target === 'undefined') {
       this[collection].forEach(function(record) {
         Object.keys(attrs).forEach(function(attr) {
           record[attr] = attrs[attr];

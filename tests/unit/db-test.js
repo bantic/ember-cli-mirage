@@ -232,7 +232,7 @@ test('it can update the whole collection', function(assert) {
 });
 
 test('it can update a record by id', function(assert) {
-  db.contacts.update(3, {name: 'Ganondorf', evil: false});
+  db.contacts.update({name: 'Ganondorf', evil: false}, 3);
   var ganon = db.contacts.find(3);
 
   assert.deepEqual(ganon, {id: 3, name: 'Ganondorf', evil: false});
@@ -248,7 +248,7 @@ test('it can update a record by id when the id is a string', function(assert) {
 });
 
 test('it can update records by query', function(assert) {
-  db.contacts.update({evil: false}, {name: 'Sam'});
+  db.contacts.update({name: 'Sam'}, {evil: false});
 
   assert.deepEqual(db.contacts, [
     {id: 1, name: 'Sam', evil: false},
