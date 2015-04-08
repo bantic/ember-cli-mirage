@@ -136,3 +136,84 @@ test('it returns an empty array if no models match a query', function(assert) {
   assert.deepEqual(users, []);
 });
 
+var schema;
+var User = Model.extend();
+module('mirage:schema#update', {
+  beforeEach: function() {
+    var db = new Db();
+    db.createCollection('users');
+    db.users.insert([
+      {id: 1, name: 'Link', good: true},
+      {id: 2, name: 'Zelda', good: true},
+      {id: 3, name: 'Ganon', good: false}
+    ]);
+    schema = new Schema(db);
+
+    schema.register('user', User);
+  }
+});
+
+test('it can update all models', function(assert) {
+  schema.user.update({good: false});
+  var users = schema.user.where({good: false});
+
+  assert.equal(users.length, 3);
+});
+
+test('it can update a model by id', function(assert) {
+  schema.user.update({good: false}, 1);
+  var link = schema.user.find(1);
+  var zelda = schema.user.find(2);
+
+  assert.equal(link.attrs.good, false);
+  assert.equal(zelda.attrs.good, true);
+});
+
+test('it can update multiple models by id', function(assert) {
+  schema.user.update({good: false}, [1, 2]);
+  var link = schema.user.find(1);
+  var zelda = schema.user.find(2);
+
+  assert.equal(link.attrs.good, false);
+  assert.equal(zelda.attrs.good, false);
+});
+
+var schema;
+var User = Model.extend();
+module('mirage:schema#destroy', {
+  beforeEach: function() {
+    var db = new Db();
+    db.createCollection('users');
+    db.users.insert([
+      {id: 1, name: 'Link', good: true},
+      {id: 2, name: 'Zelda', good: true},
+      {id: 3, name: 'Ganon', good: false}
+    ]);
+    schema = new Schema(db);
+
+    schema.register('user', User);
+  }
+});
+
+test('it can destroy all models', function(assert) {
+  schema.user.destroy();
+  var users = schema.user.all();
+
+  assert.equal(users.length, 0);
+});
+
+test('it can destroy a model by id', function(assert) {
+  schema.user.destroy(1);
+  var link = schema.user.find(1);
+  var users = schema.user.all();
+
+  assert.equal(link, null);
+  assert.equal(users.length, 2);
+});
+
+test('it can destroy multiple models by ids', function(assert) {
+  schema.user.destroy([1, 2]);
+  var users = schema.user.all();
+
+  assert.equal(users.length, 1);
+});

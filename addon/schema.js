@@ -1,20 +1,5 @@
 import { pluralize } from './utils/inflector';
 
-// repo.users.create({});
-// cache.users.create({});
-
-// schema.create('user', {name: 'Link'})
-// schema.all('user')
-// schema.find('user', 1)
-// schema.find('user', [1, 2, 3])
-// schema.where('user', {admin: true})
-
-// schema.user.create({});
-// schema.user.all();
-// schema.user.find(1);
-// schema.user.where({admin: true});
-// schema.user.update(1, {admin: true});
-
 export default function(db) {
 
   if (!db) {
@@ -33,7 +18,9 @@ export default function(db) {
       create: this._create.bind(this, type),
       all: this._all.bind(this, type),
       find: this._find.bind(this, type),
-      where: this._where.bind(this, type)
+      where: this._where.bind(this, type),
+      update: this._update.bind(this, type),
+      destroy: this._destroy.bind(this, type)
     };
 
     return this;
@@ -97,7 +84,23 @@ export default function(db) {
     return !records ? [] : records.map(function(record) {
       return new ModelClass(record);
     });
+  },
+
+  this._update = function(type, attrs, target) {
+    var collection = pluralize(type);
+    if (!db[collection]) {
+      return null;
+    }
+
+    db[collection].update(attrs, target);
+  },
+
+  this._destroy = function(type, attrs, target) {
+    var collection = pluralize(type);
+    if (!db[collection]) {
+      return null;
+    }
+
+    db[collection].remove(attrs, target);
   }
-
-
 };

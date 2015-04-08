@@ -1,5 +1,11 @@
 # Ember CLI Mirage Changelog
 
+## next
+
+Changes:
+  - [BREAKING CHANGE] #63 db.update(target, attrs) is now
+    db.update(attrs, target)
+
 ## 0.1.4
 
 Update notes: none
