@@ -145,6 +145,7 @@ module('mirage:schema#where', {
 test('it returns models that match a query with where', function(assert) {
   var users = schema.user.where({good: false});
 
+  assert.ok(users instanceof Relation, 'it returns a relation');
   assert.equal(users.length, 1);
   assert.ok(users[0] instanceof User);
   assert.deepEqual(users[0].attrs, {id: 3, name: 'Ganon', good: false});
