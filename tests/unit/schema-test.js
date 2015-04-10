@@ -1,6 +1,7 @@
-import Schema from 'ember-cli-mirage/schema';
-import Model from 'ember-cli-mirage/model';
-import Db from 'ember-cli-mirage/db';
+import Schema from 'ember-cli-mirage/orm/schema';
+import Model from 'ember-cli-mirage/orm/model';
+import Db from 'ember-cli-mirage/orm/db';
+import Relation from 'ember-cli-mirage/orm/relation';
 
 module('mirage:schema');
 
@@ -14,6 +15,8 @@ test('it cannot be instantiated without a db', function(assert) {
     var schema = new Schema();
   });
 });
+
+module('mirage:schema#create');
 
 test('it can create registered models', function(assert) {
   var schema = new Schema(new Db());
@@ -36,6 +39,8 @@ test('it cannot create models that havent been registered', function(assert) {
   });
 });
 
+module('mirage:schema#all');
+
 test('it can return all models', function(assert) {
   var db = new Db();
   db.createCollection('users');
@@ -47,7 +52,8 @@ test('it can return all models', function(assert) {
 
   var users = schema.user.all();
 
-  assert.ok(users[0] instanceof User);
+  assert.ok(users instanceof Relation, 'it returns a relation');
+  assert.ok(users[0] instanceof User, 'each member of the relation is a model');
   assert.equal(users.length, 2);
   assert.deepEqual(users[1].attrs, {id: 2, name: 'Zelda'});
 });
@@ -62,6 +68,7 @@ test('it returns an empty array when no models exist', function(assert) {
 
   var users = schema.user.all();
 
+  assert.ok(users instanceof Relation, 'it returns a relation');
   assert.equal(users.length, 0);
 });
 
@@ -85,24 +92,26 @@ test('it can find a model by id', function(assert) {
   assert.deepEqual(zelda.attrs, {id: 2, name: 'Zelda'});
 });
 
-test('it can find multiple models by ids', function(assert) {
-  var users = schema.user.find([1, 2]);
-
-  assert.ok(users[0] instanceof User);
-  assert.equal(users.length, 2);
-  assert.deepEqual(users[1].attrs, {id: 2, name: 'Zelda'});
-});
-
 test('it returns null if no model is found for an id', function(assert) {
   var user = schema.user.find(4);
 
   assert.equal(user, null);
 });
 
-test('it returns an empty array if no model is found for an array of ids', function(assert) {
+test('it can find multiple models by ids', function(assert) {
+  var users = schema.user.find([1, 2]);
+
+  assert.ok(users instanceof Relation, 'it returns a relation');
+  assert.ok(users[0] instanceof User);
+  assert.equal(users.length, 2);
+  assert.deepEqual(users[1].attrs, {id: 2, name: 'Zelda'});
+});
+
+test('it returns an empty relation if no models are found for an array of ids', function(assert) {
   var users = schema.user.find([5, 6]);
 
-  assert.deepEqual(users, []);
+  assert.ok(users instanceof Relation, 'it returns a relation');
+  assert.equal(users.length, 0);
 });
 
 var schema;
@@ -130,10 +139,11 @@ test('it returns models that match a query with where', function(assert) {
   assert.deepEqual(users[0].attrs, {id: 3, name: 'Ganon', good: false});
 });
 
-test('it returns an empty array if no models match a query', function(assert) {
+test('it returns an empty relation if no models match a query', function(assert) {
   var users = schema.user.where({name: 'Link', good: false});
 
-  assert.deepEqual(users, []);
+  assert.ok(users instanceof Relation, 'it returns a relation');
+  assert.equal(users.length, 0);
 });
 
 var schema;

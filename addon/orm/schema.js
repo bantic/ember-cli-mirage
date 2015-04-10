@@ -1,4 +1,5 @@
-import { pluralize } from './utils/inflector';
+import { pluralize } from '../utils/inflector';
+import Relation from './relation';
 
 export default function(db) {
 
@@ -15,18 +16,18 @@ export default function(db) {
     this._registry[type] = typeClass;
 
     this[type] = {
-      create: this._create.bind(this, type),
-      all: this._all.bind(this, type),
-      find: this._find.bind(this, type),
-      where: this._where.bind(this, type),
-      update: this._update.bind(this, type),
-      destroy: this._destroy.bind(this, type)
+      create: this.create.bind(this, type),
+      all: this.all.bind(this, type),
+      find: this.find.bind(this, type),
+      where: this.where.bind(this, type),
+      update: this.update.bind(this, type),
+      destroy: this.destroy.bind(this, type)
     };
 
     return this;
   };
 
-  this._create = function(type, attrs) {
+  this.create = function(type, attrs) {
     var collection = pluralize(type);
 
     if (!this.db[collection]) {
@@ -38,41 +39,28 @@ export default function(db) {
     var instance = new this._registry[type](augmentedAttrs);
 
     return instance;
-  },
+  };
 
-  this._all = function(type) {
-    var collection = pluralize(type);
-    var data = db[collection];
+  this.all = function(type) {
     var ModelClass = this._registry[type];
-    var models = [];
+    var collection = pluralize(type);
+    var records = db[collection];
 
-    data.forEach(function(attrs) {
-      models.push(new ModelClass(attrs));
-    });
+    return this._hydrate(records, type);
+  };
 
-    return models;
-  },
-
-  this._find = function(type, ids) {
+  this.find = function(type, ids) {
     var collection = pluralize(type);
     if (!db[collection]) {
       return null;
     }
 
-    var ModelClass = this._registry[type];
     var records = db[collection].find(ids);
 
-    if (Ember.isArray(ids)) {
-      return !records ? [] : records.map(function(record) {
-        return new ModelClass(record);
-      });
+    return this._hydrate(records, type);
+  };
 
-    } else {
-      return !records ? null : new ModelClass(records);
-    }
-  },
-
-  this._where = function(type, query) {
+  this.where = function(type, query) {
     var collection = pluralize(type);
     if (!db[collection]) {
       return null;
@@ -80,27 +68,47 @@ export default function(db) {
 
     var ModelClass = this._registry[type];
     var records = db[collection].where(query);
+    return this._hydrate(records, type);
 
     return !records ? [] : records.map(function(record) {
       return new ModelClass(record);
     });
-  },
+  };
 
-  this._update = function(type, attrs, target) {
+  this.update = function(type, attrs, target) {
     var collection = pluralize(type);
     if (!db[collection]) {
       return null;
     }
 
     db[collection].update(attrs, target);
-  },
+  };
 
-  this._destroy = function(type, attrs, target) {
+  this.destroy = function(type, attrs, target) {
     var collection = pluralize(type);
     if (!db[collection]) {
       return null;
     }
 
     db[collection].remove(attrs, target);
-  }
-};
+  };
+
+  /*
+    Takes a record and returns a model, or an array of records
+    and returns a relation.
+  */
+  this._hydrate = function(records, type) {
+    var ModelClass = this._registry[type];
+
+    if (Ember.isArray(records)) {
+      var models = records.map(function(record) {
+        return new ModelClass(record);
+      });
+
+      return new Relation(models);
+
+    } else {
+      return !records ? null : new ModelClass(records);
+    }
+  };
+}

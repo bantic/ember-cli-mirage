@@ -1,4 +1,4 @@
-import extend from 'ember-cli-mirage/utils/extend';
+import extend from '../utils/extend';
 
 var Model = function(attrs) {
   var _this = this;
