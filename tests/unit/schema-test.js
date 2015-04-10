@@ -114,6 +114,17 @@ test('it returns an empty relation if no models are found for an array of ids', 
   assert.equal(users.length, 0);
 });
 
+test('it throws when trying to find models from a db collection that doesnt exist', function(assert) {
+  var db = new Db();
+  schema = new Schema(db);
+
+  schema.register('user', User);
+
+  assert.throws(function() {
+    var users = schema.user.find(1);
+  }, /collection doesn't exist/);
+});
+
 var schema;
 var User = Model.extend();
 module('mirage:schema#where', {
@@ -144,6 +155,17 @@ test('it returns an empty relation if no models match a query', function(assert)
 
   assert.ok(users instanceof Relation, 'it returns a relation');
   assert.equal(users.length, 0);
+});
+
+test('it throws when trying to find models from a db collection that doesnt exist', function(assert) {
+  var db = new Db();
+  schema = new Schema(db);
+
+  schema.register('user', User);
+
+  assert.throws(function() {
+    var users = schema.user.where({name: 'Link'});
+  }, /collection doesn't exist/);
 });
 
 var schema;

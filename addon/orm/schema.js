@@ -42,7 +42,6 @@ export default function(db) {
   };
 
   this.all = function(type) {
-    var ModelClass = this._registry[type];
     var collection = pluralize(type);
     var records = db[collection];
 
@@ -52,7 +51,7 @@ export default function(db) {
   this.find = function(type, ids) {
     var collection = pluralize(type);
     if (!db[collection]) {
-      return null;
+      throw "Mirage: You're trying to find model(s) of type " + type + " but this collection doesn't exist in the database.";
     }
 
     var records = db[collection].find(ids);
@@ -63,16 +62,12 @@ export default function(db) {
   this.where = function(type, query) {
     var collection = pluralize(type);
     if (!db[collection]) {
-      return null;
+      throw "Mirage: You're trying to find model(s) of type " + type + " but this collection doesn't exist in the database.";
     }
 
-    var ModelClass = this._registry[type];
     var records = db[collection].where(query);
-    return this._hydrate(records, type);
 
-    return !records ? [] : records.map(function(record) {
-      return new ModelClass(record);
-    });
+    return this._hydrate(records, type);
   };
 
   this.update = function(type, attrs, target) {
