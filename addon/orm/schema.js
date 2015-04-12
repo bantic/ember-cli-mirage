@@ -34,7 +34,7 @@ export default function(db) {
 
     var augmentedAttrs = this.db[collection].insert(attrs);
 
-    var instance = new this._registry[type](augmentedAttrs);
+    var instance = new this._registry[type](this, augmentedAttrs);
 
     return instance;
   };
@@ -69,21 +69,25 @@ export default function(db) {
   };
 
   /*
+    Private methods
+  */
+  /*
     Takes a record and returns a model, or an array of records
     and returns a relation.
   */
   this._hydrate = function(records, type) {
+    var schema = this;
     var ModelClass = this._registry[type];
 
     if (Ember.isArray(records)) {
       var models = records.map(function(record) {
-        return new ModelClass(record);
+        return new ModelClass(schema, record);
       });
 
       return new Relation(models);
 
     } else {
-      return !records ? null : new ModelClass(records);
+      return !records ? null : new ModelClass(schema, records);
     }
   };
 }

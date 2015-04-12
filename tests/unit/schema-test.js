@@ -13,7 +13,7 @@ test('it can be instantiated', function(assert) {
 test('it cannot be instantiated without a db', function(assert) {
   assert.throws(function() {
     var schema = new Schema();
-  });
+  }, /requires a db/);
 });
 
 module('mirage:schema#create');

@@ -13,6 +13,7 @@ export default function() {
     this[collection] = [];
 
     // Attach the methods to the collection
+    // TODO: use prototype
     ['insert', 'find', 'where', 'update', 'remove']
       .forEach(function(method) {
         _this[collection][method] = function() {

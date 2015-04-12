@@ -6,6 +6,13 @@ var Relation = function() {
     args = args[0];
   }
   this.push.apply(this, args);
+
+  this.update = function(attrs) {
+    this.forEach(function(model) {
+      model.update(attrs);
+    });
+  };
+
   return this;
 }
 
