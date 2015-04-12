@@ -19,9 +19,7 @@ export default function(db) {
       create: this.create.bind(this, type),
       all: this.all.bind(this, type),
       find: this.find.bind(this, type),
-      where: this.where.bind(this, type),
-      update: this.update.bind(this, type),
-      destroy: this.destroy.bind(this, type)
+      where: this.where.bind(this, type)
     };
 
     return this;
@@ -68,24 +66,6 @@ export default function(db) {
     var records = db[collection].where(query);
 
     return this._hydrate(records, type);
-  };
-
-  this.update = function(type, attrs, target) {
-    var collection = pluralize(type);
-    if (!db[collection]) {
-      return null;
-    }
-
-    db[collection].update(attrs, target);
-  };
-
-  this.destroy = function(type, attrs, target) {
-    var collection = pluralize(type);
-    if (!db[collection]) {
-      return null;
-    }
-
-    db[collection].remove(attrs, target);
   };
 
   /*
