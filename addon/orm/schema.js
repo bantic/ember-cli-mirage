@@ -16,6 +16,7 @@ export default function(db) {
     this._registry[type] = typeClass;
 
     this[type] = {
+      new: this.new.bind(this, type),
       create: this.create.bind(this, type),
       all: this.all.bind(this, type),
       find: this.find.bind(this, type),
@@ -23,6 +24,12 @@ export default function(db) {
     };
 
     return this;
+  };
+
+  this.new = function(type, attrs) {
+    var ModelClass = this._registry[type];
+
+    return new ModelClass(this, attrs);
   };
 
   this.create = function(type, attrs) {

@@ -16,6 +16,28 @@ test('it cannot be instantiated without a db', function(assert) {
   }, /requires a db/);
 });
 
+module('mirage:schema#new');
+
+test('it can make new (unsaved) registered models', function(assert) {
+  var schema = new Schema(new Db());
+
+  var User = Model.extend();
+  schema.register('user', User);
+
+  var user = schema.user.new({name: 'Link'});
+
+  assert.ok(user instanceof User);
+  assert.deepEqual(user.attrs, {name: 'Link'});
+});
+
+test('it cannot make new models that havent been registered', function(assert) {
+  var schema = new Schema(new Db());
+
+  assert.throws(function() {
+    schema.user.new({name: 'Link'});
+  });
+});
+
 module('mirage:schema#create');
 
 test('it can create registered models', function(assert) {
