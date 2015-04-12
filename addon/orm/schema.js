@@ -29,7 +29,7 @@ export default function(db) {
   this.new = function(type, attrs) {
     var ModelClass = this._registry[type];
 
-    return new ModelClass(this, attrs);
+    return new ModelClass(this, type, attrs);
   };
 
   this.create = function(type, attrs) {
