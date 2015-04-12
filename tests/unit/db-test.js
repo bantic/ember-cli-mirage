@@ -1,4 +1,4 @@
-import Db from 'ember-cli-mirage/db';
+import Db from 'ember-cli-mirage/orm/db';
 
 import {module, test} from 'qunit';
 
@@ -23,14 +23,14 @@ module('mirage:db#createCollection', {
 test('it can create an empty collection', function(assert) {
   db.createCollection('contacts');
 
-  assert.deepEqual(db.contacts, []);
+  assert.ok(db.contacts);
 });
 
 test('it can create many collections', function(assert) {
   db.createCollections('contacts', 'addresses');
 
-  assert.deepEqual(db.contacts, []);
-  assert.deepEqual(db.addresses, []);
+  assert.ok(db.contacts);
+  assert.ok(db.addresses);
 });
 
 
@@ -50,10 +50,37 @@ test('it can load an object of data', function(assert) {
   };
   db.loadData(data);
 
-  assert.deepEqual(db.contacts, data.contacts);
-  assert.deepEqual(db.addresses, data.addresses);
+  assert.deepEqual(db.contacts.all(), data.contacts);
+  assert.deepEqual(db.addresses.all(), data.addresses);
 });
 
+var data = {
+  contacts: [{id: 1, name: 'Link'}],
+  addresses: [{id: 1, name: '123 Hyrule Way'}]
+};
+module('mirage:db#all', {
+  beforeEach: function() {
+    db = new Db();
+    db.loadData(data);
+  },
+  afterEach: function() {
+    db.emptyData();
+  }
+});
+
+test('it can return a collection', function(assert) {
+  assert.deepEqual(db.contacts.all(), data.contacts);
+  assert.deepEqual(db.addresses.all(), data.addresses);
+});
+
+test('the collection is a copy', function(assert) {
+  var contacts = db.contacts.all();
+
+  assert.deepEqual(contacts, data.contacts);
+  contacts[0].name = 'Zelda'
+
+  assert.deepEqual(db.contacts.all(), data.contacts);
+});
 
 module('mirage:db#insert', {
   beforeEach: function() {
@@ -68,35 +95,45 @@ module('mirage:db#insert', {
 test('it inserts an object and returns it', function(assert) {
   var link = db.contacts.insert({name: 'Link'});
 
-  assert.deepEqual(db.contacts, [{id: 1, name: 'Link'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 1, name: 'Link'}]);
   assert.deepEqual(link, {id: 1, name: 'Link'});
+});
+
+test('it returns a copy', function(assert) {
+  var link = db.contacts.insert({name: 'Link'});
+
+  assert.deepEqual(link, {id: 1, name: 'Link'});
+
+  link.name = 'Young link';
+
+  assert.deepEqual(db.contacts.find(1), {id: 1, name: 'Link'});
 });
 
 test('it can insert objects sequentially', function(assert) {
   db.contacts.insert({name: 'Link'});
   db.contacts.insert({name: 'Ganon'});
 
-  assert.deepEqual(db.contacts, [{id: 1, name: 'Link'}, {id: 2, name: 'Ganon'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 1, name: 'Link'}, {id: 2, name: 'Ganon'}]);
 });
 
 test('it does not add an id if present', function(assert) {
   db.contacts.insert({id: 5, name: 'Link'});
 
-  assert.deepEqual(db.contacts, [{id: 5, name: 'Link'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 5, name: 'Link'}]);
 });
 
 test('it can insert an array and return it', function(assert) {
   db.contacts.insert({name: 'Link'});
   var contacts = db.contacts.insert([{name: 'Zelda'}, {name: 'Ganon'}]);
 
-  assert.deepEqual(db.contacts, [{id: 1, name: 'Link'}, {id: 2, name: 'Zelda'}, {id: 3, name: 'Ganon'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 1, name: 'Link'}, {id: 2, name: 'Zelda'}, {id: 3, name: 'Ganon'}]);
   assert.deepEqual(contacts, [{id: 2, name: 'Zelda'}, {id: 3, name: 'Ganon'}]);
 });
 
 test('it does not add ids to array data if present', function(assert) {
   db.contacts.insert([{id: 2, name: 'Link'}, {id: 1, name: 'Ganon'}]);
 
-  assert.deepEqual(db.contacts, [{id: 2, name: 'Link'}, {id: 1, name: 'Ganon'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 2, name: 'Link'}, {id: 1, name: 'Ganon'}]);
 });
 
 test('it can insert a record with an id of 0', function(assert) {
@@ -125,6 +162,16 @@ test('returns a record that matches a numerical id', function(assert) {
   var contact = db.contacts.find(2);
 
   assert.deepEqual(contact, {id: 2, name: 'Link'});
+});
+
+test('returns a copy not a reference', function(assert) {
+  var contact = db.contacts.find(2);
+
+  assert.deepEqual(contact, {id: 2, name: 'Link'});
+
+  contact.name = 'blah';
+
+  assert.deepEqual(db.contacts.find(2), {id: 2, name: 'Link'});
 });
 
 test('coerces interger-like ids to integers', function(assert) {
@@ -161,7 +208,7 @@ test('returns multiple record that match an array of ids', function(assert) {
   assert.deepEqual(contacts, [{id: 1, name: 'Zelda'}, {id: 2, name: 'Link'}]);
 });
 
-test('returns multiple record that match an array of ids', function(assert) {
+test('returns an empty array when it doesnt find multiple ids', function(assert) {
   var contacts = db.contacts.find([99, 100]);
 
   assert.deepEqual(contacts, []);
@@ -199,6 +246,20 @@ test('it coerces query params to strings', function(assert) {
   ]);
 });
 
+test('returns a copy, not a referecne', function(assert) {
+  var result = db.contacts.where({evil: true});
+
+  assert.deepEqual(result, [
+    {id: 3, name: 'Ganon', evil: true}
+  ]);
+
+  result[0].evil = false;
+
+  assert.deepEqual(db.contacts.where({evil: true}), [
+    {id: 3, name: 'Ganon', evil: true}
+  ]);
+});
+
 test('returns an empty array if no records match the query', function(assert) {
   var result = db.contacts.where({name: 'Link', evil: true});
 
@@ -224,7 +285,7 @@ module('mirage:db#update', {
 test('it can update the whole collection', function(assert) {
   db.contacts.update({name: 'Sam', evil: false});
 
-  assert.deepEqual(db.contacts, [
+  assert.deepEqual(db.contacts.all(), [
     {id: 1, name: 'Sam', evil: false},
     {id: 2, name: 'Sam', evil: false},
     {id: 3, name: 'Sam', evil: false}
@@ -260,7 +321,7 @@ test('it can update multiple records by ids', function(assert) {
 test('it can update records by query', function(assert) {
   db.contacts.update({name: 'Sam'}, {evil: false});
 
-  assert.deepEqual(db.contacts, [
+  assert.deepEqual(db.contacts.all(), [
     {id: 1, name: 'Sam', evil: false},
     {id: 2, name: 'Sam', evil: false},
     {id: 3, name: 'Ganon', evil: true}
@@ -308,13 +369,13 @@ module('mirage:db#remove', {
 test('it can remove an entire collection', function(assert) {
   db.contacts.remove();
 
-  assert.deepEqual(db.contacts, []);
+  assert.deepEqual(db.contacts.all(), []);
 });
 
 test('it can remove a single record', function(assert) {
   db.contacts.remove(1);
 
-  assert.deepEqual(db.contacts, [
+  assert.deepEqual(db.contacts.all(), [
     {id: 2, name: 'Zelda', evil: false},
     {id: 3, name: 'Ganon', evil: true},
   ]);
@@ -334,7 +395,7 @@ test('it can remove a single record then the id is a string', function(assert) {
 test('it can remove multiple records by ids', function(assert) {
   db.contacts.remove([1, 2]);
 
-  assert.deepEqual(db.contacts, [
+  assert.deepEqual(db.contacts.all(), [
     {id: 3, name: 'Ganon', evil: true}
   ]);
 });
@@ -342,7 +403,7 @@ test('it can remove multiple records by ids', function(assert) {
 test('it can remove multiple records by query', function(assert) {
   db.contacts.remove({evil: false});
 
-  assert.deepEqual(db.contacts, [
+  assert.deepEqual(db.contacts.all(), [
     {id: 3, name: 'Ganon', evil: true},
   ]);
 });
