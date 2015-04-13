@@ -41,14 +41,12 @@ export default function(db) {
 
     var augmentedAttrs = this.db[collection].insert(attrs);
 
-    var instance = new this._registry[type](this, augmentedAttrs);
-
-    return instance;
+    return new this._registry[type](this, type, augmentedAttrs);
   };
 
   this.all = function(type) {
     var collection = pluralize(type);
-    var records = db[collection];
+    var records = db[collection]._records;
 
     return this._hydrate(records, type);
   };
@@ -88,13 +86,13 @@ export default function(db) {
 
     if (Ember.isArray(records)) {
       var models = records.map(function(record) {
-        return new ModelClass(schema, record);
+        return new ModelClass(schema, type, record);
       });
 
       return new Relation(models);
 
     } else {
-      return !records ? null : new ModelClass(schema, records);
+      return !records ? null : new ModelClass(schema, type, records);
     }
   };
 }
