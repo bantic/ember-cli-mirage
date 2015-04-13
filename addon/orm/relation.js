@@ -7,9 +7,15 @@ var Relation = function() {
   }
   this.push.apply(this, args);
 
-  this.update = function(attrs) {
+  this.update = function(key, val) {
     this.forEach(function(model) {
-      model.update(attrs);
+      model.update(key, val);
+    });
+  };
+
+  this.destroy = function() {
+    this.forEach(function(model) {
+      model.destroy();
     });
   };
 
