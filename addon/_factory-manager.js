@@ -16,16 +16,16 @@ export default function(db, modelRegistry) {
   // this.register = function(name, factory) {
   // };
 
-  // this.loadDefinitions = function(factoryMap) {
-  //   var _this = this;
-  //   // Store a reference to the factories
-  //   this._factoryMap = factoryMap;
+  this.loadFactories = function(factoryMap) {
+    var _this = this;
+    // Store a reference to the factories
+    this._factoryMap = factoryMap;
 
-  //   // Create a collection for each factory
-  //   Ember.keys(factoryMap).forEach(function(type) {
-  //     _this.db.createCollection(pluralize(type));
-  //   });
-  // };
+    // Create a collection for each factory
+    Ember.keys(factoryMap).forEach(function(type) {
+      _this.db.createCollection(pluralize(type));
+    });
+  };
 
   // this.create = function(type) {
 
@@ -89,7 +89,7 @@ export default function(db, modelRegistry) {
 
   this._getAttrsForType = function(type) {
     return this._registry[type];
-  }
+  };
 
 }
 

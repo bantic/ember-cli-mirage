@@ -2,6 +2,7 @@ import Relation from 'ember-cli-mirage/orm/relation';
 import Schema from 'ember-cli-mirage/orm/schema';
 import Model from 'ember-cli-mirage/orm/model';
 import Db from 'ember-cli-mirage/orm/db';
+import {module, test} from 'qunit';
 
 module('mirage:relation');
 

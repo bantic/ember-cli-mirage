@@ -1,48 +1,23 @@
-/* global jQuery */
 import Ember from 'ember';
-import Sequence from './attributes/sequence';
-import Lazy from './attributes/lazy';
+/* global jQuery */
 
 var Factory = function() {
-
-  this._sequence = 1;
-
-  this.build = function() {
-    var _this = this;
+  this.build = function(sequence) {
     var object = {};
     var attrs = this.attrs || {};
 
     Ember.keys(attrs).forEach(function(key) {
-      var attr = attrs[key];
-      var type = typeof attr;
+      var type = typeof attrs[key];
 
-      switch (attr.constructor) {
-        case Sequence:
-          attr.factory = _this;
-          object[key] = attr.evaluate();
-          break;
-
-        case Lazy:
-          attr.factory = _this;
-          object[key] = attr.evaluate();
-          break;
-
-        // for backwards compat
-        case Function:
-          object[key] = attr.call(attrs, _this._sequence);
-          break;
-
-        default:
-          object[key] = attr;
-          break;
+      if (type === 'function') {
+        object[key] = attrs[key].call(attrs, sequence);
+      } else {
+        object[key] = attrs[key];
       }
     });
 
-    this._sequence++;
-
     return object;
   };
-
 };
 
 Factory.extend = function(attrs) {

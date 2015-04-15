@@ -27,7 +27,7 @@ export default {
     } else if (options.coalesce && request.queryParams && request.queryParams.ids) {
       data[key] = db[collection].find(request.queryParams.ids);
     } else {
-      data[key] = db[collection];
+      data[key] = db[collection].all();
     }
     return data;
   },
@@ -74,7 +74,7 @@ export default {
           owner = model;
 
         } else {
-          data[key] = db[collection];
+          data[key] = db[collection].all();
         }
       }
     });
@@ -113,7 +113,7 @@ export default {
     } else if (options.coalesce && request.queryParams && request.queryParams.ids) {
       data[collection] = db[collection].find(request.queryParams.ids);
     } else {
-      data[collection] = db[collection];
+      data[collection] = db[collection].all();
     }
     return data;
   }

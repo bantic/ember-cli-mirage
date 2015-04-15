@@ -48,7 +48,7 @@ var Model = function(schema, type, attrs) {
   this.update = function(key, val) {
     var _this = this;
     var attrs;
-    if (key == null) return this;
+    if (key == null) {return this;}
 
     if (typeof key === 'object') {
       attrs = key;
@@ -73,7 +73,7 @@ var Model = function(schema, type, attrs) {
 
   this.isNew = function() {
     return this.attrs.id === undefined;
-  }
+  };
 
   return this;
 };

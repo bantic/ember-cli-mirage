@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import { pluralize } from '../utils/inflector';
 import Relation from './relation';
 
@@ -11,8 +12,6 @@ export default function(db) {
   this._registry = {};
 
   this.register = function(type, typeClass) {
-    var _this = this;
-
     this._registry[type] = typeClass;
 
     this[type] = {

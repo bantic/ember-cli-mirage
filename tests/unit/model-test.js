@@ -1,6 +1,7 @@
 import Model from 'ember-cli-mirage/orm/model';
 import Schema from 'ember-cli-mirage/orm/schema';
 import Db from 'ember-cli-mirage/orm/db';
+import {module, test} from 'qunit';
 
 module('mirage:model');
 
@@ -161,7 +162,7 @@ test('removes the record from the db', function(assert) {
 
   assert.deepEqual(link.attrs, {id: 1, name: 'Link', evil: false});
 
-  link.destroy()
+  link.destroy();
 
   assert.deepEqual(db.users.find(1), null);
   assert.deepEqual(db.users.all(), []);

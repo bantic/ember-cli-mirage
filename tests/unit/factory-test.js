@@ -4,26 +4,26 @@ import {module, test} from 'qunit';
 
 module('mirage:factory');
 
-test('it exists', function() {
-  ok(Mirage.Factory);
+test('it exists', function(assert) {
+  assert.ok(Mirage.Factory);
 });
 
-test('the base class builds empty objects', function() {
+test('the base class builds empty objects', function(assert) {
   var f = new Mirage.Factory();
   var data = f.build();
 
   assert.deepEqual(data, {});
 });
 
-test('a noop extension builds empty objects', function() {
+test('a noop extension builds empty objects', function(assert) {
   var EmptyFactory = Mirage.Factory.extend();
   var f = new EmptyFactory();
   var data = f.build();
 
-  deepEqual(data, {});
+  assert.deepEqual(data, {});
 });
 
-test('it works with strings, numbers and booleans', function() {
+test('it works with strings, numbers and booleans', function(assert) {
   var AFactory = Mirage.Factory.extend({
     name: 'Sam',
     age: 28,
@@ -33,10 +33,10 @@ test('it works with strings, numbers and booleans', function() {
   var f = new AFactory();
   var data = f.build();
 
-  deepEqual(data, {name: 'Sam', age: 28, alive: true});
+  assert.deepEqual(data, {name: 'Sam', age: 28, alive: true});
 });
 
-test('it supports inheritance', function() {
+test('it supports inheritance', function(assert) {
   var PersonFactory = Mirage.Factory.extend({
     species: 'human'
   });
@@ -51,37 +51,52 @@ test('it supports inheritance', function() {
   var m = new ManFactory();
   var s = new SamFactory();
 
-  deepEqual(p.build(), {species: 'human'});
-  deepEqual(m.build(), {species: 'human', gender: 'male'});
-  deepEqual(s.build(), {species: 'human', gender: 'male', name: 'Sam'});
+  assert.deepEqual(p.build(), {species: 'human'});
+  assert.deepEqual(m.build(), {species: 'human', gender: 'male'});
+  assert.deepEqual(s.build(), {species: 'human', gender: 'male', name: 'Sam'});
 });
 
-test('it can use sequences', function() {
+test('it can use sequences', function(assert) {
   var PostFactory = Mirage.Factory.extend({
-    likes: Mirage.sequence(i => 5*i)
+    likes: function(i) {
+      return 5*i;
+    }
   });
 
   var p = new PostFactory();
-  var post1 = p.build();
-  var post2 = p.build();
+  var post1 = p.build(1);
+  var post2 = p.build(2);
 
-  deepEqual(post1, {likes: 5});
-  deepEqual(post2, {likes: 10});
+  assert.deepEqual(post1, {likes: 5});
+  assert.deepEqual(post2, {likes: 10});
 });
 
+// test('it can use sequences', function(assert) {
+//   var PostFactory = Mirage.Factory.extend({
+//     likes: Mirage.sequence(i => 5*i)
+//   });
 
-test('it can lazily calculate expressions ', function() {
-  var Factory = Mirage.Factory.extend({
-    value: Mirage.lazy(() => {
-      return 1 + 1;
-    })
-  });
-  var factory = new Factory();
+//   var p = new PostFactory();
+//   var post1 = p.build();
+//   var post2 = p.build();
 
-  var obj = factory.build();
+//   deepEqual(post1, {likes: 5});
+//   deepEqual(post2, {likes: 10});
+// });
 
-  deepEqual(obj, {value: 2});
-});
+
+// test('it can lazily calculate expressions ', function(assert) {
+//   var Factory = Mirage.Factory.extend({
+//     value: Mirage.lazy(() => {
+//       return 1 + 1;
+//     })
+//   });
+//   var factory = new Factory();
+
+//   var obj = factory.build();
+
+//   deepEqual(obj, {value: 2});
+// });
 
 // test('it can lazily calculate expressions that depend on other attrs', function() {
 //   var Factory = Mirage.Factory.extend({

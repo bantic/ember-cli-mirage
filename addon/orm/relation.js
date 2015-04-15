@@ -20,7 +20,7 @@ var Relation = function() {
   };
 
   return this;
-}
+};
 
 Relation.prototype = Object.create(Array.prototype);
 

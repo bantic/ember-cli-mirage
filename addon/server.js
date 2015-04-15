@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import { pluralize } from './utils/inflector';
 import Pretender from 'pretender';
-import Db from './db';
+import Db from './orm/db';
 import controller from './controller';
 
 /*
@@ -29,7 +29,6 @@ function extractStubArguments(/* path, handler, code, options */) {
 
 /*
   The Mirage server, which has a db and an XHR interceptor.
-
   Requires an environment.
 */
 export default function(options) {
@@ -86,7 +85,6 @@ export default function(options) {
 
   /*
     Pretender instance with default config.
-
     TODO: Inject?
   */
   this.interceptor = new Pretender(function() {
@@ -107,18 +105,48 @@ export default function(options) {
 
   /*
     Db instance
-
     TODO: Inject?
   */
   this.db = new Db();
 
   /*
-    The server's factories and aliases
+    Factory methods and props
   */
-  this.factoryManager = new FactoryManager();
-  this.loadFactories = this.factoryManager.loadFactories;
-  this.create = this.factoryManager.create;
-  this.createList = this.factoryManager.createList;
+  this.loadFactories = function(factoryMap) {
+    var _this = this;
+    // Store a reference to the factories
+    this._factoryMap = factoryMap;
+
+    // Create a collection for each factory
+    Ember.keys(factoryMap).forEach(function(type) {
+      _this.db.createCollection(pluralize(type));
+    });
+  };
+
+  this.create = function(type, overrides) {
+    var collection = pluralize(type);
+    var currentRecords = this.db[collection].all();
+    var sequence = currentRecords ? currentRecords.length: 0;
+    if (!this._factoryMap || !this._factoryMap[type]) {
+      throw "You're trying to create a " + type + ", but no factory for this type was found";
+    }
+    var OriginalFactory = this._factoryMap[type];
+    var Factory = OriginalFactory.extend(overrides);
+    var factory = new Factory();
+
+    var attrs = factory.build(sequence);
+    return this.db[collection].insert(attrs);
+  };
+
+  this.createList = function(type, amount, overrides) {
+    var list = [];
+
+    for (var i = 0; i < amount; i++) {
+      list.push(this.create(type, overrides));
+    }
+
+    return list;
+  };
 
   // TODO: Better way to inject server
   if (environment === 'test') {

@@ -3,7 +3,9 @@ import Ember from 'ember';
 export default Ember.Route.extend({
 
   model() {
-    return this.store.find('contact').then(null, (reason) => {
+    return this.store.find('contact').then((response) => {
+      return response;
+    }, (reason) => {
       this.set('error', reason.responseJSON.errors[0]);
     });
   },

@@ -77,7 +77,7 @@ test('the collection is a copy', function(assert) {
   var contacts = db.contacts.all();
 
   assert.deepEqual(contacts, data.contacts);
-  contacts[0].name = 'Zelda'
+  contacts[0].name = 'Zelda';
 
   assert.deepEqual(db.contacts.all(), data.contacts);
 });
