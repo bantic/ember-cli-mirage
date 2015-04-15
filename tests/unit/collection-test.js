@@ -1,18 +1,18 @@
-import Relation from 'ember-cli-mirage/orm/relation';
+import Collection from 'ember-cli-mirage/orm/collection';
 import Schema from 'ember-cli-mirage/orm/schema';
 import Model from 'ember-cli-mirage/orm/model';
 import Db from 'ember-cli-mirage/orm/db';
 import {module, test} from 'qunit';
 
-module('mirage:relation');
+module('mirage:collection');
 
 test('it can be instantiated', function(assert) {
-  var relation = new Relation();
-  assert.ok(relation);
+  var collection = new Collection();
+  assert.ok(collection);
 });
 
-var db, relation;
-module('mirage:relation#update', {
+var db, collection;
+module('mirage:collection#update', {
   beforeEach: function() {
     db = new Db();
     db.createCollection('users');
@@ -21,7 +21,7 @@ module('mirage:relation#update', {
     var User = Model.extend();
     schema.register('user', User);
 
-    relation = new Relation([
+    collection = new Collection([
       schema.user.create({name: 'Link', location: 'Hyrule', evil: false}),
       schema.user.create({name: 'Zelda', location: 'Hyrule', evil: false}),
     ]);
@@ -34,14 +34,14 @@ test('it can update its models with a key and value', function(assert) {
     {id: 2, name: 'Zelda', location: 'Hyrule', evil: false},
   ]);
 
-  relation.update('evil', true);
+  collection.update('evil', true);
 
   assert.deepEqual(db.users.all(), [
     {id: 1, name: 'Link', location: 'Hyrule', evil: true},
     {id: 2, name: 'Zelda', location: 'Hyrule', evil: true},
   ]);
-  assert.deepEqual(relation[0].attrs, {id: 1, name: 'Link', location: 'Hyrule', evil: true});
-  assert.deepEqual(relation[1].attrs, {id: 2, name: 'Zelda', location: 'Hyrule', evil: true});
+  assert.deepEqual(collection[0].attrs, {id: 1, name: 'Link', location: 'Hyrule', evil: true});
+  assert.deepEqual(collection[1].attrs, {id: 2, name: 'Zelda', location: 'Hyrule', evil: true});
 });
 
 test('it can update its models with a hash of attrs', function(assert) {
@@ -50,18 +50,18 @@ test('it can update its models with a hash of attrs', function(assert) {
     {id: 2, name: 'Zelda', location: 'Hyrule', evil: false},
   ]);
 
-  relation.update({location: 'The water temple', evil: true});
+  collection.update({location: 'The water temple', evil: true});
 
   assert.deepEqual(db.users.all(), [
     {id: 1, name: 'Link', location: 'The water temple', evil: true},
     {id: 2, name: 'Zelda', location: 'The water temple', evil: true},
   ]);
-  assert.deepEqual(relation[0].attrs, {id: 1, name: 'Link', location: 'The water temple', evil: true});
-  assert.deepEqual(relation[1].attrs, {id: 2, name: 'Zelda', location: 'The water temple', evil: true});
+  assert.deepEqual(collection[0].attrs, {id: 1, name: 'Link', location: 'The water temple', evil: true});
+  assert.deepEqual(collection[1].attrs, {id: 2, name: 'Zelda', location: 'The water temple', evil: true});
 });
 
-var db, relation;
-module('mirage:relation#destroy', {
+var db, collection;
+module('mirage:collection#destroy', {
   beforeEach: function() {
     db = new Db();
     db.createCollection('users');
@@ -70,7 +70,7 @@ module('mirage:relation#destroy', {
     var User = Model.extend();
     schema.register('user', User);
 
-    relation = new Relation([
+    collection = new Collection([
       schema.user.create({name: 'Link', location: 'Hyrule', evil: false}),
       schema.user.create({name: 'Zelda', location: 'Hyrule', evil: false}),
     ]);
@@ -83,7 +83,7 @@ test('it can destroy its models', function(assert) {
     {id: 2, name: 'Zelda', location: 'Hyrule', evil: false},
   ]);
 
-  relation.destroy();
+  collection.destroy();
 
   assert.deepEqual(db.users.all(), []);
 });

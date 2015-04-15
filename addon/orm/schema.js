@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import { pluralize } from '../utils/inflector';
-import Relation from './relation';
+import Collection from './collection';
 
 export default function(db) {
 
@@ -77,7 +77,7 @@ export default function(db) {
   */
   /*
     Takes a record and returns a model, or an array of records
-    and returns a relation.
+    and returns a collection.
   */
   this._hydrate = function(records, type) {
     var schema = this;
@@ -88,7 +88,7 @@ export default function(db) {
         return new ModelClass(schema, type, record);
       });
 
-      return new Relation(models);
+      return new Collection(models);
 
     } else {
       return !records ? null : new ModelClass(schema, type, records);
