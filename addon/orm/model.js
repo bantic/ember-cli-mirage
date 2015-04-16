@@ -1,3 +1,4 @@
+// import hasMany from './relations/has-many';
 import { pluralize } from '../utils/inflector';
 import extend from '../utils/extend';
 
@@ -26,6 +27,25 @@ var Model = function(schema, type, attrs) {
       });
     });
   }
+
+  // Setup relationships
+  Object.keys(Object.getPrototypeOf(this)).forEach(function(attr) {
+    if (_this[attr].default && _this[attr].default.name === 'hasMany') {
+      var relatedType = _this[attr].type;
+
+      Object.defineProperty(_this, attr, {
+        get: function () {
+          var key = _this._type + '_id';
+          var query = {};
+          query[key] = this.id;
+
+          return schema[relatedType].where(query);
+        }
+        // set: function (val) { _this.attrs[attr] = val; return _this; },
+      });
+    }
+  });
+
 
   /*
     Create or update the model.
@@ -81,5 +101,14 @@ var Model = function(schema, type, attrs) {
 };
 
 Model.extend = extend;
+// Model.extend = function(relationships) {
+//   console.log(relationships);
+//   debugger;
+//   Object.keys(relationships).forEach(function(attr) {
+//     console.log(attr);
+//   });
+
+//   return this;
+// }
 
 export default Model;
