@@ -61,6 +61,8 @@ var Model = function(schema, type, attrs) {
     });
 
     this.save();
+
+    return this;
   };
 
   /*

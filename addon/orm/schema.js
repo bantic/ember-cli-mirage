@@ -13,6 +13,11 @@ export default function(db) {
 
   this.register = function(type, typeClass) {
     this._registry[type] = typeClass;
+    var collection = pluralize(type);
+
+    if (!this.db[collection]) {
+      db.createCollection(collection);
+    }
 
     this[type] = {
       new: this.new.bind(this, type),
@@ -33,10 +38,6 @@ export default function(db) {
 
   this.create = function(type, attrs) {
     var collection = pluralize(type);
-
-    if (!this.db[collection]) {
-      db.createCollection(collection);
-    }
 
     var augmentedAttrs = this.db[collection].insert(attrs);
 
