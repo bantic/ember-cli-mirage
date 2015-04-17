@@ -1,8 +1,6 @@
 import { singularize } from 'ember-cli-mirage/utils/inflector';
 import Association from './association';
-/*
-  An array of related models
-*/
+
 export default Association.extend({
 
   defineRelationship: function(model, key, schema) {
@@ -22,3 +20,4 @@ export default Association.extend({
   }
 
 });
+

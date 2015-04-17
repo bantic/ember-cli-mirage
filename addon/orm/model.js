@@ -19,6 +19,7 @@ var Model = function(schema, type, attrs) {
   this._schema = schema;
   this.type = type;
 
+  // Setup plain attributes
   this.attrs = attrs;
   if (attrs) {
     Object.keys(attrs).forEach(function(attr) {
@@ -30,13 +31,9 @@ var Model = function(schema, type, attrs) {
   }
 
   // Setup relationships
-  Object.keys(Object.getPrototypeOf(this)).forEach(function(attr) {
-    if (_this[attr] instanceof Association) {
-      var association = _this[attr];
-      association.defineRelationship(_this, attr, _this._schema);
-    }
+  this._getAssociationKeys().forEach(function(attr) {
+    _this[attr].defineRelationship(_this, attr, _this._schema);
   });
-
 
   /*
     Create or update the model.
@@ -89,6 +86,19 @@ var Model = function(schema, type, attrs) {
   };
 
   return this;
+};
+
+
+/*
+  Private methods
+*/
+Model.prototype._getAssociationKeys = function() {
+  var _this = this;
+
+  return Object.keys(Object.getPrototypeOf(this))
+    .filter(function(attr) {
+      return _this[attr] instanceof Association;
+    });
 };
 
 Model.extend = extend;

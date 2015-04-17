@@ -1,24 +1,20 @@
 import { singularize } from 'ember-cli-mirage/utils/inflector';
-/*
-  An array of related models
-*/
-export default function(type) {
+import Association from './association';
 
-  /*
-    Define the property on the model.
-  */
-  this.defineRelationship = function(model, key, schema) {
-    debugger;
+export default Association.extend({
+
+  defineRelationship: function(model, key, schema) {
+    var _this = this;
+
     Object.defineProperty(model, key, {
       get: function () {
-        var relatedType = type ? type : singularize(key);
-        var foreignKey = model.type + '_id';
-        var query = {};
-        query[foreignKey] = model.id;
+        var relatedType = _this.type ? _this.type : singularize(key);
+        var foreignKey = key + '_id';
 
-        return schema[relatedType].where(query);
+        return schema[relatedType].find(model[foreignKey]);
       }
       // set: function (val) { _this.attrs[attr] = val; return _this; },
     });
-  };
-}
+  }
+
+});
