@@ -17,8 +17,11 @@ export default Association.extend({
       }
     });
 
-    model['create' + capitalize(key)] = function() {
-      return 1;
+    model['create' + capitalize(key)] = function(attrs) {
+      var newModel = schema[key].create(attrs);
+      model.update(foreignKey, newModel.id);
+
+      return newModel;
     };
   }
 

@@ -59,9 +59,7 @@ test('the child can create its parent model', function(assert) {
   var address = schema.address.find(1);
   var ganon = address.createUser({name: 'Ganon'});
 
-  var ganon = schema.user.where({name: 'Ganon'})[0];
-
   assert.ok(ganon.id);
   assert.deepEqual(ganon, schema.user.find(ganon.id));
-  assert.equal(address.user_id, ganon.id)
+  assert.equal(address.user_id, ganon.id);
 });
