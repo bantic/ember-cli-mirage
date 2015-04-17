@@ -5,7 +5,7 @@ import Db from 'ember-cli-mirage/orm/db';
 import {module, test} from 'qunit';
 
 var db, schema, User, Address;
-module('mirage:integration:schema:hasMany', {
+module('mirage:integration:schema:belongsTo', {
   beforeEach: function() {
     db = new Db();
     db.createCollection('users');
@@ -18,11 +18,9 @@ module('mirage:integration:schema:hasMany', {
     ]);
     schema = new Schema(db);
 
-    User = Model.extend({
-      addresses: Mirage.hasMany()
-    });
+    User = Model.extend();
     Address = Model.extend({
-
+      user: Mirage.belongsTo()
     });
 
     schema.register('user', User);
@@ -30,11 +28,11 @@ module('mirage:integration:schema:hasMany', {
   }
 });
 
-test('the parent can read child models', function(assert) {
+test('the child can read the parent model', function(assert) {
+  var address = schema.address.find(1);
   var link = schema.user.find(1);
 
-  assert.deepEqual(link.attrs, {id: 1, name: 'Link'});
-  assert.deepEqual(link.addresses[0].attrs, {id: 1, user_id: 1, name: '123 Hyrule Way'});
+  assert.deepEqual(address.user, link);
 });
 
 

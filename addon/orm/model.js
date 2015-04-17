@@ -1,6 +1,7 @@
 // import hasMany from './relations/has-many';
 import { pluralize } from '../utils/inflector';
 import extend from '../utils/extend';
+import Association from './associations/association';
 
 /*
   The Model class. Notes:
@@ -16,7 +17,7 @@ var Model = function(schema, type, attrs) {
   if (!type) {throw 'Mirage: A model requires a type'; }
 
   this._schema = schema;
-  this._type = type;
+  this.type = type;
 
   this.attrs = attrs;
   if (attrs) {
@@ -30,19 +31,9 @@ var Model = function(schema, type, attrs) {
 
   // Setup relationships
   Object.keys(Object.getPrototypeOf(this)).forEach(function(attr) {
-    if (_this[attr].default && _this[attr].default.name === 'hasMany') {
-      var relatedType = _this[attr].type;
-
-      Object.defineProperty(_this, attr, {
-        get: function () {
-          var key = _this._type + '_id';
-          var query = {};
-          query[key] = this.id;
-
-          return schema[relatedType].where(query);
-        }
-        // set: function (val) { _this.attrs[attr] = val; return _this; },
-      });
+    if (_this[attr] instanceof Association) {
+      var association = _this[attr];
+      association.defineRelationship(_this, attr, _this._schema);
     }
   });
 
@@ -51,7 +42,7 @@ var Model = function(schema, type, attrs) {
     Create or update the model.
   */
   this.save = function() {
-    var collection = pluralize(this._type);
+    var collection = pluralize(this.type);
 
     if (this.isNew()) {
       this.attrs = this._schema.db[collection].insert(this.attrs);
@@ -89,7 +80,7 @@ var Model = function(schema, type, attrs) {
     Destroy the db record.
   */
   this.destroy = function() {
-    var collection = pluralize(this._type);
+    var collection = pluralize(this.type);
     this._schema.db[collection].remove(this.attrs.id);
   };
 
@@ -101,14 +92,5 @@ var Model = function(schema, type, attrs) {
 };
 
 Model.extend = extend;
-// Model.extend = function(relationships) {
-//   console.log(relationships);
-//   debugger;
-//   Object.keys(relationships).forEach(function(attr) {
-//     console.log(attr);
-//   });
-
-//   return this;
-// }
 
 export default Model;
