@@ -10,11 +10,13 @@ module('mirage:integration:schema:belongsTo', {
     db = new Db();
     db.createCollection('users');
     db.users.insert([
-      {id: 1, name: 'Link'}
+      {id: 1, name: 'Link'},
+      {id: 2, name: 'Zelda'}
     ]);
     db.createCollection('addresses');
     db.addresses.insert([
-      {id: 1, user_id: 1, name: '123 Hyrule Way'}
+      {id: 1, user_id: 1, name: '123 Hyrule Way'},
+      {id: 2, name: '456 Goron City'}
     ]);
     schema = new Schema(db);
 
@@ -35,13 +37,31 @@ test('the child can read the parent model', function(assert) {
   assert.deepEqual(address.user, link);
 });
 
+test('it returns null if no parent model is found', function(assert) {
+  var address = schema.address.find(2);
 
-// test('the parent can create child models', function(assert) {
-//   var link = schema.user.find(1);
-//   debugger;
+  assert.deepEqual(address.user, null);
+});
 
-//   link.addresses.create({name: '123 Hyrule Way'});
+test('the child can update the parent model', function(assert) {
+  var address = schema.address.find(1);
+  var link = schema.user.find(1);
+  var zelda = schema.user.find(2);
 
-//   assert.deepEqual(db.users.all(), [{id: 1, name: 'Link'}]);
-//   assert.deepEqual(db.addresses.all(), [{id: 1, address_id: 1, name: '123 Hyrule Way'}]);
-// });
+  assert.deepEqual(address.user, link);
+
+  address.user = zelda;
+
+  assert.deepEqual(address.user, zelda);
+});
+
+test('the child can create its parent model', function(assert) {
+  var address = schema.address.find(1);
+  var ganon = address.createUser({name: 'Ganon'});
+
+  var ganon = schema.user.where({name: 'Ganon'})[0];
+
+  assert.ok(ganon.id);
+  assert.deepEqual(ganon, schema.user.find(ganon.id));
+  assert.equal(address.user_id, ganon.id)
+});
