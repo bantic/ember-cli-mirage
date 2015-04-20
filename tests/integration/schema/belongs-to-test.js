@@ -40,10 +40,10 @@ test('the child can create its parent model', function(assert) {
 });
 
 
-var schema;
+var schema, db;
 module('mirage:integration:schema:belongsTo#read', {
   beforeEach: function() {
-    var db = new Db();
+    db = new Db();
     db.loadData({
       users: [
         {id: 1, name: 'Link'},
@@ -80,10 +80,10 @@ test('it returns null if no parent model is found', function(assert) {
 });
 
 
-var schema;
+var schema, db;
 module('mirage:integration:schema:belongsTo#update', {
   beforeEach: function() {
-    var db = new Db();
+    db = new Db();
     db.createCollection('users');
     db.users.insert([
       {id: 1, name: 'Link'},
@@ -116,4 +116,10 @@ test('the child can update the parent model', function(assert) {
   address.user = zelda;
 
   assert.deepEqual(address.user, zelda);
+  assert.equal(schema.address.find(1).user_id, link.id, "the data hasn't been saved");
+
+  address.save();
+
+  assert.deepEqual(address.user, zelda);
+  assert.equal(schema.address.find(1).user.id, zelda.id, "the data was saved");
 });

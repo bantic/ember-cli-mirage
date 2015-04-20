@@ -13,7 +13,7 @@ export default Association.extend({
         return schema[relatedType].find(model[foreignKey]);
       },
       set: function (newModel) {
-        model.update(foreignKey, newModel.id);
+        model[foreignKey] = newModel.id;
       }
     });
 
