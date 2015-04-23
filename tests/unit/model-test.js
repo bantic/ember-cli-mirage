@@ -19,3 +19,16 @@ test('it cannot be instantiated without a type', function(assert) {
     new Model({});
   }, /requires a type/);
 });
+
+test('it can get passed-in attrs', function(assert) {
+  var model = new Model({}, 'user', {name: 'Sam'});
+
+  assert.equal(model.name, 'Sam');
+});
+
+test('defineAttribute adds an attr to the attrs hash with a value of null', function(assert) {
+  var model = new Model({}, 'user', {firstName: 'Sam'});
+
+  model.defineAttribute('lastName');
+  assert.deepEqual(model.attrs, {firstName: 'Sam', lastName: null});
+});

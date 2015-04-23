@@ -26,6 +26,9 @@ module('mirage:integration:schema:belongsTo#create', {
   }
 });
 
+// test('the child can build an unsaved parent model', function(assert) {
+// });
+
 test('the child can create its parent model', function(assert) {
   var address = schema.address.find(1);
 
@@ -77,6 +80,7 @@ test('it returns null if no parent model is found', function(assert) {
   var address = schema.address.find(2);
 
   assert.deepEqual(address.user, null);
+  assert.equal(address.user_id, null);
 });
 
 
@@ -106,7 +110,7 @@ module('mirage:integration:schema:belongsTo#update', {
   }
 });
 
-test('the child can update the parent model', function(assert) {
+test('a child with an old parent can update its parent to a new saved model', function(assert) {
   var address = schema.address.find(1);
   var link = schema.user.find(1);
   var zelda = schema.user.find(2);
@@ -122,4 +126,48 @@ test('the child can update the parent model', function(assert) {
 
   assert.deepEqual(address.user, zelda);
   assert.equal(schema.address.find(1).user.id, zelda.id, "the data was saved");
+});
+
+test('a child with no parent can update its parent to a new saved model', function(assert) {
+  var address = schema.address.find(2);
+  var link = schema.user.find(1);
+
+  assert.equal(address.user, null);
+  assert.deepEqual(address.attrs, {id: 2, name: '456 Goron City', user_id: null});
+
+  address.user = link;
+
+  assert.deepEqual(address.user, link);
+  assert.equal(schema.address.find(2).user_id, null, "the data hasn't been saved");
+
+  address.save();
+
+  assert.deepEqual(address.user, link);
+  assert.deepEqual(address.attrs, {id: 2, name: '456 Goron City', user_id: link.id});
+  assert.equal(schema.address.find(2).user.id, link.id, "the data was saved");
+});
+
+test('a child with an old parent can set its parent to an unsaved model', function(assert) {
+  var address = schema.address.find(1);
+  var link = schema.user.find(1);
+  var youngLink = schema.user.new({name: 'Young link'});
+
+  assert.deepEqual(address.user, link);
+
+  address.user = youngLink;
+
+  assert.deepEqual(address.user, youngLink, 'address has a reference to new user');
+  assert.equal(schema.address.find(1).user_id, link.id, "...but the address hasn't changed in the db");
+
+  youngLink.save();
+
+  assert.ok(youngLink.id, 'new user was saved to db');
+  // assert.equal(address.user_id, youngLink.id, 'the id was updated on the instance');
+  // assert.deepEqual(address.user, youngLink, 'address still has reference to the new user');
+  // assert.equal(schema.address.find(1).user_id, link.id, "...but the address still hasn't been updated in the db");
+
+  // address.save();
+
+  // assert.deepEqual(address.user, youngLink);
+  // assert.equal(schema.address.find(1).user.id, youngLink.id, "and saved in the db");
 });

@@ -1,4 +1,3 @@
-// import hasMany from './relations/has-many';
 import { pluralize } from '../utils/inflector';
 import extend from '../utils/extend';
 import Association from './associations/association';
@@ -13,27 +12,40 @@ import Association from './associations/association';
 var Model = function(schema, type, attrs) {
   var _this = this;
 
-  if (!schema) {throw 'Mirage: A model requires a schema'; }
-  if (!type) {throw 'Mirage: A model requires a type'; }
+  if (!schema) { throw 'Mirage: A model requires a schema'; }
+  if (!type) { throw 'Mirage: A model requires a type'; }
 
   this._schema = schema;
   this.type = type;
 
-  // Setup plain attributes
-  this.attrs = attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach(function(attr) {
-      Object.defineProperty(_this, attr, {
-        get: function () { return _this.attrs[attr]; },
-        set: function (val) { _this.attrs[attr] = val; return _this; },
-      });
-    });
-  }
+
+  /*
+    attrs {id: 1, name: '123 Hyrule Way', user_id: 1}
+
+    for each attr in attrs
+      if attr is a foreign key (e.g. user_id)
+        setup a getter/setter that pulls id from .association
+        and, if attr val is non-null,
+
+      if attr is not a foreign key (i.e. a plain attribute)
+
+  */
+
+
 
   // Setup relationships
   this._getAssociationKeys().forEach(function(attr) {
     _this[attr].defineRelationship(_this, attr, _this._schema);
   });
+
+  // Setup plain attributes
+  this.attrs = attrs;
+  if (attrs) {
+    Object.keys(attrs).forEach(function(attr) {
+      _this.defineAttribute(attr);
+    });
+  }
+
 
   /*
     Create or update the model.
@@ -42,7 +54,13 @@ var Model = function(schema, type, attrs) {
     var collection = pluralize(this.type);
 
     if (this.isNew()) {
+      // Update the attrs with the db response
       this.attrs = this._schema.db[collection].insert(this.attrs);
+
+      // Ensure the id getter/setter is set
+      _this.defineAttribute('id');
+
+      // Update child models who hold a reference
     } else {
       this._schema.db[collection].update(this.attrs, this.attrs.id);
     }
@@ -88,6 +106,21 @@ var Model = function(schema, type, attrs) {
   return this;
 };
 
+
+Model.prototype.defineAttribute = function(attr) {
+  if (this[attr] !== undefined) { return; }
+
+  // Ensure the attribute is on the attrs hash
+  // if (!this.attrs.hasOwnProperty(attr)) {
+  //   this.attrs[attr] = null;
+  // }
+
+  // Define the getter/setter
+  Object.defineProperty(this, attr, {
+    get: function () { return this.attrs[attr]; },
+    set: function (val) { this.attrs[attr] = val; return this; },
+  });
+};
 
 /*
   Private methods

@@ -43,6 +43,7 @@ test('it can make new models and then save them', function(assert) {
 
   user.save();
 
+  assert.ok(user.id, 'user has an id getter');
   assert.deepEqual(user.attrs, {id: 1, name: 'Link'});
   assert.deepEqual(db.users.all(), [{id: 1, name: 'Link'}]);
 });
