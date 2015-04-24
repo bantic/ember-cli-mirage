@@ -20,14 +20,14 @@ export default Association.extend({
     // this._ensureForeignKeyIsDefined(model, foreignKey);
 
     // Define the foreign key getter/setter
-    Object.defineProperty(model, foreignKey, {
-      get: function() {
-        return this.attrs[attr];
-      },
-      set: function(val) {
-        this.attrs[attr] = val; return this;
-      }
-    });
+    // Object.defineProperty(model, foreignKey, {
+    //   get: function() {
+    //     return this.attrs[attr];
+    //   },
+    //   set: function(val) {
+    //     this.attrs[attr] = val; return this;
+    //   }
+    // });
 
     // Define the relationship getter/setter
     Object.defineProperty(model, key, {
