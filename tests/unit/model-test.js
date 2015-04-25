@@ -25,10 +25,3 @@ test('it can get passed-in attrs', function(assert) {
 
   assert.equal(model.name, 'Sam');
 });
-
-test('defineAttribute adds an attr to the attrs hash with a value of null', function(assert) {
-  var model = new Model({}, 'user', {firstName: 'Sam'});
-
-  model.defineAttribute('lastName');
-  assert.deepEqual(model.attrs, {firstName: 'Sam', lastName: null});
-});

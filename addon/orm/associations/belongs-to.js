@@ -2,13 +2,33 @@ import { singularize, capitalize } from 'ember-cli-mirage/utils/inflector';
 import Association from './association';
 
 /*
-address belongs to user
+say an address belongs to user
 
-user is in db
-user is new
-address has a saved user
-address has a new user
-address has no user
+current problem:
+  how to setup user_id
+  how to setup user
+
+how to get user, user_id in the following situations?
+  address.new({user_id: 1})
+    user_id is 1
+    user is schema.user.find(1)
+
+  address.new({user_id: null})
+    user_id is null
+    user is null
+
+  address.new({}) // no user_id
+    user_id is null
+    user is null
+
+  address.user_id =
+
+after_instantiation:
+  address
+  user is new
+  address has a saved user
+  address has a new user
+  address has no user
 */
 
 export default Association.extend({
