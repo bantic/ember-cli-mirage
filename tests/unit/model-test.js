@@ -1,3 +1,4 @@
+import Mirage from 'ember-cli-mirage';
 import Model from 'ember-cli-mirage/orm/model';
 import {module, test} from 'qunit';
 
@@ -21,7 +22,7 @@ test('it cannot be instantiated without a type', function(assert) {
 });
 
 test('it can get passed-in attrs', function(assert) {
-  var model = new Model({}, 'user', {name: 'Sam'});
+  var model = new Model({}, 'user', {name: 'Link'});
 
-  assert.equal(model.name, 'Sam');
+  assert.equal(model.name, 'Link');
 });

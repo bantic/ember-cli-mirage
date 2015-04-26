@@ -30,12 +30,12 @@ module('mirage:integration:schema:hasMany', {
   }
 });
 
-test('the parent can read child models', function(assert) {
-  var link = schema.user.find(1);
+// test('the parent can read child models', function(assert) {
+//   var link = schema.user.find(1);
 
-  assert.deepEqual(link.attrs, {id: 1, name: 'Link'});
-  assert.deepEqual(link.addresses[0].attrs, {id: 1, user_id: 1, name: '123 Hyrule Way'});
-});
+//   assert.deepEqual(link.attrs, {id: 1, name: 'Link'});
+//   assert.deepEqual(link.addresses[0].attrs, {id: 1, user_id: 1, name: '123 Hyrule Way'});
+// });
 
 
 // test('the parent can create child models', function(assert) {

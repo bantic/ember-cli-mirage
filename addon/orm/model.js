@@ -1,6 +1,7 @@
 import { pluralize } from '../utils/inflector';
 import extend from '../utils/extend';
 import Association from './associations/association';
+import Ember from 'ember';
 
 /*
   The Model class. Notes:
@@ -9,7 +10,7 @@ import Association from './associations/association';
     .extend and anonymous functions, so you cannot use
     reflection to find the name of the constructor.
 */
-var Model = function(schema, type, attrs) {
+var Model = function(schema, type, initAttrs) {
   var _this = this;
 
   if (!schema) { throw 'Mirage: A model requires a schema'; }
@@ -17,35 +18,11 @@ var Model = function(schema, type, attrs) {
 
   this._schema = schema;
   this.type = type;
+  this.foreignKeys = [];
 
-
-  /*
-    attrs {id: 1, name: '123 Hyrule Way', user_id: 1}
-
-    for each attr in attrs
-      if attr is a foreign key (e.g. user_id)
-        setup a getter/setter that pulls id from .association
-        and, if attr val is non-null,
-
-      if attr is not a foreign key (i.e. a plain attribute)
-
-  */
-
-
-
-  // Setup relationships
-  this._getAssociationKeys().forEach(function(attr) {
-    _this[attr].defineRelationship(_this, attr, _this._schema);
-  });
-
-  // Setup plain attributes
-  this.attrs = attrs;
-  if (attrs) {
-    Object.keys(attrs).forEach(function(attr) {
-      _this.defineAttribute(attr);
-    });
-  }
-
+  this._setupAttrs(initAttrs);
+  this._setupRelationships();
+  this._setupPlainAttributes(initAttrs);
 
   /*
     Create or update the model.
@@ -111,9 +88,9 @@ Model.prototype.defineAttribute = function(attr) {
   if (this[attr] !== undefined) { return; }
 
   // Ensure the attribute is on the attrs hash
-  // if (!this.attrs.hasOwnProperty(attr)) {
-  //   this.attrs[attr] = null;
-  // }
+  if (!this.attrs.hasOwnProperty(attr)) {
+    this.attrs[attr] = null;
+  }
 
   // Define the getter/setter
   Object.defineProperty(this, attr, {
@@ -125,6 +102,51 @@ Model.prototype.defineAttribute = function(attr) {
 /*
   Private methods
 */
+/*
+  attrs represents the persistable attributes, i.e. your db
+  table fields. This method sets up that hash with its
+  intiial values.
+
+  It knows about passed-in attrs, plus any foreign keys required
+  by its associations.
+*/
+Model.prototype._setupAttrs = function(initAttrs) {
+  var attrs = {};
+
+  // TODO: replace with _.assign
+  var foreignKeysHash = this._getForeignKeysHash(initAttrs);
+  initAttrs = Ember.merge(initAttrs, foreignKeysHash);
+
+  Object.keys(initAttrs)
+    .filter(function(attr) {
+      return !(initAttrs[attr] instanceof Association); })
+    .forEach(function(attr) {
+      var initialVal = initAttrs[attr] !== undefined ? initAttrs[attr] : null;
+      attrs[attr] = initialVal;
+    });
+
+  this.attrs = attrs;
+};
+
+Model.prototype._getForeignKeysHash = function(initAttrs) {
+  var _this = this;
+  var hash = {};
+
+  this._getAssociationKeys().forEach(function(key) {
+    hash = Ember.merge(hash, _this[key].getForeignKeysHash(key, initAttrs));
+  });
+
+  return hash;
+};
+
+Model.prototype._setupRelationships = function() {
+  var _this = this;
+
+  this._getAssociationKeys().forEach(function(attr) {
+    _this[attr].defineRelationship(_this, attr, _this._schema);
+  });
+};
+
 Model.prototype._getAssociationKeys = function() {
   var _this = this;
 
@@ -132,6 +154,27 @@ Model.prototype._getAssociationKeys = function() {
     .filter(function(attr) {
       return _this[attr] instanceof Association;
     });
+};
+
+Model.prototype._setupPlainAttributes = function(attrs) {
+  var _this = this;
+
+  this._getPlainAttributeKeys().forEach(function(attr) {
+    _this.defineAttribute(attr);
+  });
+};
+
+/*
+  Essentially how we get the db field names, minus the foreign
+  keys
+*/
+Model.prototype._getPlainAttributeKeys = function() {
+  var _this = this;
+  var attrs = this.attrs ? Object.keys(this.attrs) : [];
+
+  return attrs.filter(function(attr) {
+    return _this.foreignKeys.indexOf(attr) === -1;
+  });
 };
 
 Model.extend = extend;
