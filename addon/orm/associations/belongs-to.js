@@ -26,6 +26,7 @@ export default Association.extend({
         return this.attrs[foreignKey];
       },
       set: function(val) {
+        _this._tempParent = null;
         this.attrs[foreignKey] = val;
         return this;
       }
