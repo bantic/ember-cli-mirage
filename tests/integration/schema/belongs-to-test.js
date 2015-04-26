@@ -30,7 +30,7 @@ module('mirage:integration:schema:belongsTo#instantiate', {
   }
 });
 
-test('it accepts a parent id that references a saved parent', function(assert) {
+test('it accepts a saved parents id', function(assert) {
   var address = schema.address.new({user_id: 1});
 
   assert.equal(address.user_id, 1);
@@ -46,20 +46,45 @@ test('it accepts a null parent id', function(assert) {
   assert.deepEqual(address.attrs, {user_id: null});
 });
 
-test('it accepts no reference to a parent id', function(assert) {
-  var address = schema.address.new({});
+test('it accepts a saved parent model', function(assert) {
+  var address = schema.address.new({user: link});
+
+  assert.equal(address.user_id, 1);
+  assert.deepEqual(address.user, link);
+  assert.deepEqual(address.attrs, {user_id: 1});
+});
+
+test('it accepts a new parent model', function(assert) {
+  var zelda = schema.user.new({name: 'Zelda'});
+  var address = schema.address.new({user: zelda});
+
+  assert.equal(address.user_id, null);
+  assert.deepEqual(address.user, zelda);
+  assert.deepEqual(address.attrs, {user_id: null});
+});
+
+test('it accepts a null parent model', function(assert) {
+  var address = schema.address.new({user: null});
 
   assert.equal(address.user_id, null);
   assert.deepEqual(address.user, null);
   assert.deepEqual(address.attrs, {user_id: null});
 });
 
-test('it accepts a parent model', function(assert) {
-  var address = schema.address.new({user: link});
+test('it accepts a parent model and id', function(assert) {
+  var address = schema.address.new({user: link, user_id: 1});
 
   assert.equal(address.user_id, 1);
   assert.deepEqual(address.user, link);
   assert.deepEqual(address.attrs, {user_id: 1});
+});
+
+test('it accepts no reference to a parent id or model', function(assert) {
+  var address = schema.address.new({});
+
+  assert.equal(address.user_id, null);
+  assert.deepEqual(address.user, null);
+  assert.deepEqual(address.attrs, {user_id: null});
 });
 
 // var schema;

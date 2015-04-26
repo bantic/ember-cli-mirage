@@ -80,11 +80,9 @@ export default Association.extend({
     return hash;
   },
 
-  defineRelationship: function(model, key, schema) {
+  defineRelationship: function(model, key, schema, initAttrs) {
     var _this = this;
     var foreignKey = key + '_id';
-
-    model.foreignKeys.push(foreignKey);
 
     // Define the foreign key getter/setter
     Object.defineProperty(model, foreignKey, {
@@ -100,13 +98,14 @@ export default Association.extend({
     // Define the relationship getter/setter
     Object.defineProperty(model, key, {
       get: function() {
-        // if (this._tempParent) {
-        //   return this._tempParent;
-        // }
+        if (_this._tempParent) {
+          return _this._tempParent;
+        }
 
         var relatedType = _this.type ? _this.type : singularize(key);
         return schema[relatedType].find(model[foreignKey]);
       },
+
       set: function(newModel) {
         // if (newModel.isNew()) {
         //   this._tempParent = newModel;
@@ -116,6 +115,11 @@ export default Association.extend({
         // }
       }
     });
+
+    // If an unsaved model was passed into init, save a reference to it
+    if (initAttrs[key] && !initAttrs[key].id) {
+      this._tempParent = initAttrs[key];
+    }
 
     // model['create' + capitalize(key)] = function(attrs) {
     //   var newModel = schema[key].create(attrs);

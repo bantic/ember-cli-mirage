@@ -21,7 +21,7 @@ var Model = function(schema, type, initAttrs) {
   this.foreignKeys = [];
 
   this._setupAttrs(initAttrs);
-  this._setupRelationships();
+  this._setupRelationships(initAttrs);
   this._setupPlainAttributes(initAttrs);
 
   /*
@@ -140,11 +140,11 @@ Model.prototype._getForeignKeysHash = function(initAttrs) {
   return hash;
 };
 
-Model.prototype._setupRelationships = function() {
+Model.prototype._setupRelationships = function(initAttrs) {
   var _this = this;
 
   this._getAssociationKeys().forEach(function(attr) {
-    _this[attr].defineRelationship(_this, attr, _this._schema);
+    _this[attr].defineRelationship(_this, attr, _this._schema, initAttrs);
   });
 };
 
@@ -170,11 +170,11 @@ Model.prototype._setupPlainAttributes = function(attrs) {
   keys
 */
 Model.prototype._getPlainAttributeKeys = function() {
-  var _this = this;
   var attrs = this.attrs ? Object.keys(this.attrs) : [];
+  var foreignKeys = Object.keys(this._getForeignKeysHash());
 
   return attrs.filter(function(attr) {
-    return _this.foreignKeys.indexOf(attr) === -1;
+    return foreignKeys.indexOf(attr) === -1;
   });
 };
 
