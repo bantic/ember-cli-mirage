@@ -2,49 +2,6 @@ import { singularize, capitalize } from 'ember-cli-mirage/utils/inflector';
 import Association from './association';
 
 /*
-say an address belongs to user
-
-current problem:
-  how to setup user_id
-  how to setup user
-
-how to get user, user_id in the following situations?
-
-// on instantiation
-
-  address.new({user_id: 1})
-    this.user_id = 1
-    user is user.find(this.user_id)
-
-  address.new({user_id: null})
-    this.user_id = null
-    user is user.find(this.user_id)
-
-  address.new({}) // no user_id
-    this.user_id = null
-    user is user.find(this.user_id)
-
-  address.new({user: savedUser})
-    this.user_id = savedUser.id
-    user is user.find(this.user_id)
-
-  address.new({user: newUser})
-    this.user_id = null
-    this._tempAssociation = newUser
-    user is _tempAssociation
-
-  address.new({user: null})
-    this.user_id = null
-    this._tempAssociation = null
-    user is user.find(this.user_id)
-
-  address.new({user_id: x, user: y})
-    error
-
-  address.new({user_id: x, user: x})
-    this.user_id = x
-    user is user.find(this.user_id)
-
 // after instantiation
 
   address.user_id = 1

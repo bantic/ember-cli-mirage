@@ -5,16 +5,14 @@ import Db from 'ember-cli-mirage/orm/db';
 import {module, test} from 'qunit';
 
 var schema, link;
-module('mirage:integration:schema:belongsTo#instantiate', {
+module('mirage:integration:schema:belongsTo#new', {
   beforeEach: function() {
     var db = new Db();
     db.loadData({
       users: [
         {id: 1, name: 'Link'}
       ],
-      addresses: [
-        {id: 1, name: '123 Hyrule Way'}
-      ]
+      addresses: []
     });
     schema = new Schema(db);
 
