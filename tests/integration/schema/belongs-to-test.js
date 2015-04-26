@@ -42,7 +42,7 @@ test('it accepts a null parent id', function(assert) {
   var address = schema.address.new({user_id: null});
 
   assert.equal(address.user_id, null);
-  assert.equal(address.user, null);
+  assert.deepEqual(address.user, null);
   assert.deepEqual(address.attrs, {user_id: null});
 });
 
@@ -50,7 +50,7 @@ test('it accepts no reference to a parent id', function(assert) {
   var address = schema.address.new({});
 
   assert.equal(address.user_id, null);
-  assert.equal(address.user, null);
+  assert.deepEqual(address.user, null);
   assert.deepEqual(address.attrs, {user_id: null});
 });
 
@@ -58,8 +58,8 @@ test('it accepts a parent model', function(assert) {
   var address = schema.address.new({user: link});
 
   assert.equal(address.user_id, 1);
-  // assert.equal(address.user, link);
-  // assert.deepEqual(address.attrs, {user_id: 1});
+  assert.deepEqual(address.user, link);
+  assert.deepEqual(address.attrs, {user_id: 1});
 });
 
 // var schema;

@@ -111,6 +111,7 @@ Model.prototype.defineAttribute = function(attr) {
   by its associations.
 */
 Model.prototype._setupAttrs = function(initAttrs) {
+  var _this = this;
   var attrs = {};
 
   // TODO: replace with _.assign
@@ -119,7 +120,7 @@ Model.prototype._setupAttrs = function(initAttrs) {
 
   Object.keys(initAttrs)
     .filter(function(attr) {
-      return !(initAttrs[attr] instanceof Association); })
+      return !( _this[attr] instanceof Association); })
     .forEach(function(attr) {
       var initialVal = initAttrs[attr] !== undefined ? initAttrs[attr] : null;
       attrs[attr] = initialVal;
