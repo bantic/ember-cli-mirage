@@ -1,27 +1,6 @@
 import { singularize, capitalize } from 'ember-cli-mirage/utils/inflector';
 import Association from './association';
 
-/*
-// after instantiation
-
-  address.user_id = 1
-  // address.user = user.find(this.user_id)
-
-  address.user_id = null
-  // address.user = null
-  // _tempAssociation = null
-
-  address.user = savedUser
-  // address.user_id = savedUser.id
-
-  address.user = null
-  // address.user_id = null
-
-  address.user = newUser
-  // address.user_id = null
-
-*/
-
 export default Association.extend({
 
   getForeignKeysHash: function(key, initAttrs) {
@@ -64,12 +43,15 @@ export default Association.extend({
       },
 
       set: function(newModel) {
-        // if (newModel.isNew()) {
-        //   this._tempParent = newModel;
-        // } else {
-        //   this._tempParent = null;
-        //   model[foreignKey] = newModel.id;
-        // }
+        if (newModel && newModel.isNew()) {
+          model[foreignKey] = null;
+          _this._tempParent = newModel;
+        } else if (newModel) {
+          _this._tempParent = null;
+          model[foreignKey] = newModel.id;
+        } else {
+          model[foreignKey] = null;
+        }
       }
     });
 

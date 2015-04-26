@@ -37,7 +37,7 @@ var Model = function(schema, type, initAttrs) {
       // Ensure the id getter/setter is set
       _this.defineAttribute('id');
 
-      // Update child models who hold a reference
+      // Update child models who hold a reference?
     } else {
       this._schema.db[collection].update(this.attrs, this.attrs.id);
     }
