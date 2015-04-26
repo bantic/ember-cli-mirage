@@ -19,6 +19,7 @@ var Model = function(schema, type, initAttrs) {
   this._schema = schema;
   this.type = type;
   this.foreignKeys = [];
+  initAttrs = initAttrs || {};
 
   this._setupAttrs(initAttrs);
   this._setupRelationships(initAttrs);
@@ -134,7 +135,8 @@ Model.prototype._getForeignKeysHash = function(initAttrs) {
   var hash = {};
 
   this._getAssociationKeys().forEach(function(key) {
-    hash = Ember.merge(hash, _this[key].getForeignKeysHash(key, initAttrs));
+    var association = _this[key];
+    hash = Ember.merge(hash, association.getForeignKeysHash(key, initAttrs));
   });
 
   return hash;

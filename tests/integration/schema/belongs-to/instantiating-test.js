@@ -77,8 +77,16 @@ test('it accepts a parent model and id', function(assert) {
   assert.deepEqual(address.attrs, {user_id: 1});
 });
 
-test('it accepts no reference to a parent id or model', function(assert) {
+test('it accepts no reference to a parent id or model as empty obj', function(assert) {
   var address = schema.address.new({});
+
+  assert.equal(address.user_id, null);
+  assert.deepEqual(address.user, null);
+  assert.deepEqual(address.attrs, {user_id: null});
+});
+
+test('it accepts no reference to a parent id or model', function(assert) {
+  var address = schema.address.new();
 
   assert.equal(address.user_id, null);
   assert.deepEqual(address.user, null);
