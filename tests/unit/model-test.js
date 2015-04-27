@@ -20,9 +20,3 @@ test('it cannot be instantiated without a type', function(assert) {
     new Model({});
   }, /requires a type/);
 });
-
-test('it can get passed-in attrs', function(assert) {
-  var model = new Model({}, 'user', {name: 'Link'});
-
-  assert.equal(model.name, 'Link');
-});

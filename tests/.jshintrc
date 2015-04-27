@@ -26,7 +26,8 @@
     "describe",
     "afterEach",
     "it",
-    "server"
+    "server",
+    "sinon"
   ],
   "node": false,
   "browser": false,
