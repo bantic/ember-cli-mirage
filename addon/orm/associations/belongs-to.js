@@ -68,13 +68,12 @@ export default Association.extend({
       return newModel;
     };
 
-    // Not implemented yet
-    // model['new' + capitalize(key)] = function(attrs) {
-    //   var newModel = schema[key].new(attrs);
-    //   model[foreignKey] = newModel.getUuid();
+    model['new' + capitalize(key)] = function(attrs) {
+      var newModel = schema[key].new(attrs);
+      model[key] = newModel;
 
-    //   return newModel;
-    // };
+      return newModel;
+    };
   },
 
   // _ensureForeignKeyIsDefined: function(model, foreignKey) {
