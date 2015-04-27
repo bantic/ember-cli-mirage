@@ -61,12 +61,12 @@ export default Association.extend({
       this._tempParent = initAttrs[key];
     }
 
-    // model['create' + capitalize(key)] = function(attrs) {
-    //   var newModel = schema[key].create(attrs);
-    //   model.update(foreignKey, newModel.id);
+    model['create' + capitalize(key)] = function(attrs) {
+      var newModel = schema[key].create(attrs);
+      model[foreignKey] = newModel.id;
 
-    //   return newModel;
-    // };
+      return newModel;
+    };
 
     // Not implemented yet
     // model['new' + capitalize(key)] = function(attrs) {
