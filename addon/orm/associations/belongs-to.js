@@ -74,10 +74,6 @@ export default Association.extend({
 
       return newModel;
     };
-  },
-
-  // _ensureForeignKeyIsDefined: function(model, foreignKey) {
-  //   model.defineAttribute(foreignKey);
-  // }
+  }
 
 });
