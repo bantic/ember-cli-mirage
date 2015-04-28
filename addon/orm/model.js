@@ -1,7 +1,6 @@
 import { pluralize } from '../utils/inflector';
 import extend from '../utils/extend';
 import Association from './associations/association';
-import Ember from 'ember';
 
 /*
   The Model class. Notes:
@@ -115,9 +114,8 @@ Model.prototype._setupAttrs = function(initAttrs) {
   var _this = this;
   var attrs = {};
 
-  // TODO: replace with _.assign
   var foreignKeysHash = this._getForeignKeysHash(initAttrs);
-  initAttrs = Ember.merge(initAttrs, foreignKeysHash);
+  initAttrs = _.assign(initAttrs, foreignKeysHash);
 
   Object.keys(initAttrs)
     .filter(function(attr) {
@@ -136,7 +134,7 @@ Model.prototype._getForeignKeysHash = function(initAttrs) {
 
   this._getAssociationKeys().forEach(function(key) {
     var association = _this[key];
-    hash = Ember.merge(hash, association.getForeignKeysHash(key, initAttrs));
+    hash = _.assign(hash, association.getForeignKeysHash(key, initAttrs));
   });
 
   return hash;

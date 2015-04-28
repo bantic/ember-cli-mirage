@@ -1,5 +1,4 @@
 import Ember from 'ember';
-/* global jQuery */
 
 var Factory = function() {
   this.build = function(sequence) {
@@ -22,7 +21,7 @@ var Factory = function() {
 
 Factory.extend = function(attrs) {
   // Merge the new attributes with existing ones. If conflict, new ones win.
-  var newAttrs = _.extend({}, this.attrs, attrs);
+  var newAttrs = _.assign({}, this.attrs, attrs);
 
   var Subclass = function() {
     this.attrs = newAttrs;
