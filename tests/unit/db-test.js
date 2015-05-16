@@ -415,8 +415,8 @@ test('it can add a record after removing all records', function(assert) {
   db.contacts.remove();
   db.contacts.insert({name: 'Foo'});
 
-  assert.equal(db.contacts.length, 1);
-  assert.deepEqual(db.contacts, [
+  assert.equal(db.contacts.all().length, 1);
+  assert.deepEqual(db.contacts.all(), [
     {id: 1, name: 'Foo'}
   ]);
 });
