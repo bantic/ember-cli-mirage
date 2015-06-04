@@ -21,9 +21,11 @@ export default Association.extend({
   },
 
   addMethodsToModel: function(model, key, schema) {
-    var _this = this;
+    var association = this;
     var foreignKey = this.getForeignKey();
-    model.associationKeys = model.associationKeys.concat([key, foreignKey]);
+
+    model.associationKeys.push(key);
+    model.associationIdKeys.push(foreignKey);
 
     Object.defineProperty(model, this.getForeignKey(), {
       /*
@@ -39,8 +41,8 @@ export default Association.extend({
           - sets the associated parent (via id)
       */
       set: function(id) {
-        if (id && !schema[_this.referent].find(id)) {
-          throw "Couldn't find " + _this.referent + " with id = " + id;
+        if (id && !schema[association.referent].find(id)) {
+          throw "Couldn't find " + association.referent + " with id = " + id;
         }
 
         this.attrs[foreignKey] = id;
@@ -56,11 +58,11 @@ export default Association.extend({
       get: function() {
         var foreignKeyId = this[foreignKey];
         if (foreignKeyId) {
-          _this._tempParent = null;
-          return schema[_this.referent].find(foreignKeyId);
+          association._tempParent = null;
+          return schema[association.referent].find(foreignKeyId);
 
-        } else if (_this._tempParent) {
-          return _this._tempParent;
+        } else if (association._tempParent) {
+          return association._tempParent;
         } else {
           return null;
         }
@@ -73,12 +75,12 @@ export default Association.extend({
       set: function(newModel) {
         if (newModel && newModel.isNew()) {
           this[foreignKey] = null;
-          _this._tempParent = newModel;
+          association._tempParent = newModel;
         } else if (newModel) {
-          _this._tempParent = null;
+          association._tempParent = null;
           this[foreignKey] = newModel.id;
         } else {
-          _this._tempParent = null;
+          association._tempParent = null;
           this[foreignKey] = null;
         }
       }

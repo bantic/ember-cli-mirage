@@ -25,13 +25,14 @@ export default Association.extend({
     var foreignKey = this.getForeignKey();
     var relationshipIdsKey = association.referent + '_ids';
 
-    model.associationKeys = model.associationKeys.concat([key, relationshipIdsKey]);
+    model.associationKeys.push(key);
+    model.associationIdKeys.push(relationshipIdsKey);
 
     Object.defineProperty(model, relationshipIdsKey, {
-    //   /*
-    //     object.children_ids
-    //       - returns an array of the associated children's ids
-    //   */
+      /*
+        object.children_ids
+          - returns an array of the associated children's ids
+      */
       get: function() {
         if (this.isNew()) {
           var tempModels = association._tempChildren || [];
@@ -119,17 +120,18 @@ export default Association.extend({
       }
     });
 
-    // /*
-    //   object.newParent
-    //     - creates a new unsaved associated parent
-    // */
-    // model['new' + capitalize(key)] = function(attrs) {
-    //   var parent = schema[key].new(attrs);
+    /*
+      object.newChild
+        - creates a new unsaved associated child
+    */
+    model['new' + capitalize(association.referent)] = function(attrs) {
+      var child = schema[association.referent].new(attrs);
 
-    //   this[key] = parent;
+      association._tempChildren = _.compact(association._tempChildren) || [];
+      association._tempChildren.push(child);
 
-    //   return parent;
-    // };
+      return child;
+    };
 
     /*
       object.createChild

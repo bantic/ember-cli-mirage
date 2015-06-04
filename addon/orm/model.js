@@ -28,7 +28,8 @@ var Model = function(schema, type, attrs, fks) {
   return this;
 };
 
-Model.prototype.associationKeys = [];
+Model.prototype.associationKeys = [];    // ex: address.user, user.addresses
+Model.prototype.associationIdKeys = [];  // ex: address.user_id, user.address_ids. may or may not be a fk.
 
 /*
   Create or save the model
@@ -43,10 +44,13 @@ Model.prototype.save = function() {
     // Ensure the id getter/setter is set
     this._definePlainAttribute('id');
 
-    // Update child models who hold a reference?
   } else {
     this._schema.db[collection].update(this.attrs, this.attrs.id);
   }
+
+  // Update child models who hold a reference
+  this._saveAssociations();
+
 
   return this;
 };
@@ -111,7 +115,7 @@ Model.prototype._setupAttrs = function(attrs) {
 
   // Filter out association keys
   var hash = Object.keys(attrs).reduce(function(memo, attr) {
-    if (_this.associationKeys.indexOf(attr) === -1) {
+    if (_this.associationKeys.indexOf(attr) === -1 && _this.associationIdKeys.indexOf(attr) === -1) {
       memo[attr] = attrs[attr];
     }
 
@@ -127,7 +131,7 @@ Model.prototype._setupAttrs = function(attrs) {
 
   // define plain getter/setters for non-fks/non-association keys
   Object.keys(attrs).forEach(function(attr) {
-    if ((_this.fks.indexOf(attr) === -1) && (_this.associationKeys.indexOf(attr) === -1)) {
+    if (_this.fks.indexOf(attr) === -1 && _this.associationKeys.indexOf(attr) === -1 && _this.associationIdKeys.indexOf(attr) === -1) {
       _this._definePlainAttribute(attr);
     }
   });
@@ -156,7 +160,7 @@ Model.prototype._setupRelationships = function(attrs) {
 
   // Only want association keys and fks
   var hash = Object.keys(attrs).reduce(function(memo, attr) {
-    if (_this.associationKeys.indexOf(attr) > -1 || _this.fks.indexOf(attr) > -1) {
+    if (_this.associationKeys.indexOf(attr) > -1 || _this.associationIdKeys.indexOf(attr) > -1 || _this.fks.indexOf(attr) > -1) {
       memo[attr] = attrs[attr];
     }
 
@@ -166,6 +170,10 @@ Model.prototype._setupRelationships = function(attrs) {
   Object.keys(hash).forEach(function(attr) {
     _this[attr] = hash[attr];
   });
+};
+
+Model.prototype._saveAssociations = function() {
+  // debugger;
 };
 
 Model.extend = extend.bind(Model, null);
