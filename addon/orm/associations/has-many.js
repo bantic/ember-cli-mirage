@@ -131,17 +131,18 @@ export default Association.extend({
     //   return parent;
     // };
 
-    // /*
-    //   object.createParent
-    //     - creates an associated parent, persists directly to db
-    // */
-    // model['create' + capitalize(key)] = function(attrs) {
-    //   var parent = schema[key].create(attrs);
+    /*
+      object.createChild
+        - creates an associated child, persists directly to db
+    */
+    model['create' + capitalize(association.referent)] = function(attrs) {
+      var child = schema[association.referent].create(attrs);
 
-    //   this[foreignKey] = parent.id;
+      association._tempChildren = _.compact(association._tempChildren) || [];
+      association._tempChildren.push(child);
 
-    //   return parent;
-    // };
+      return child;
+    };
   }
 
 });
