@@ -123,7 +123,6 @@ Model.prototype._setupAttrs = function(attrs) {
     hash[fk] = attrs[fk] || null;
   });
 
-  // debugger;
   this.attrs = hash;
 
   // define plain getter/setters for non-fks/non-association keys

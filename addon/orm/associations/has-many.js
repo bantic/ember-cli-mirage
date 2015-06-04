@@ -34,7 +34,8 @@ export default Association.extend({
     //   */
       get: function() {
         if (this.isNew()) {
-          return association._tempChildren.map(function(child) {return child.id;});
+          var tempModels = association._tempChildren || [];
+          return tempModels.map(function(child) {return child.id;});
         } else {
 
         }
@@ -75,7 +76,8 @@ export default Association.extend({
       */
       get: function() {
         if (this.isNew()) {
-          return association._tempChildren;
+          var tempModels = association._tempChildren || [];
+          return tempModels;
 
         } else {
           var query = {};
@@ -96,22 +98,25 @@ export default Association.extend({
         // }
       },
 
-    //   /*
-    //     object.parent = (parentModel)
-    //       - sets the associated parent (via model)
-    //   */
-    //   set: function(newModel) {
-    //     if (newModel && newModel.isNew()) {
-    //       this[foreignKey] = null;
-    //       _this._tempParent = newModel;
-    //     } else if (newModel) {
-    //       _this._tempParent = null;
-    //       this[foreignKey] = newModel.id;
-    //     } else {
-    //       _this._tempParent = null;
-    //       this[foreignKey] = null;
-    //     }
-    //   }
+      /*
+        object.children = (childModels)
+          - sets the associated children (via array of models)
+      */
+      set: function(newModels) {
+        if (this.isNew()) {
+          association._tempChildren = _.compact(newModels);
+        }
+        // if (newModel && newModel.isNew()) {
+        //   this[foreignKey] = null;
+        //   _this._tempParent = newModel;
+        // } else if (newModel) {
+        //   _this._tempParent = null;
+        //   this[foreignKey] = newModel.id;
+        // } else {
+        //   _this._tempParent = null;
+        //   this[foreignKey] = null;
+        // }
+      }
     });
 
     // /*
