@@ -28,8 +28,7 @@ export default Association.extend({
     var foreignKey = this.getForeignKey();
     var relationshipIdsKey = association.referent + '_ids';
 
-    var associationHash = {};
-    associationHash[key] = this;
+    var associationHash = {[key]: this};
     model.hasManyAssociations = _.assign(model.hasManyAssociations, associationHash);
     model.associationKeys.push(key);
     model.associationIdKeys.push(relationshipIdsKey);

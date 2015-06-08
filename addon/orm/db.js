@@ -221,7 +221,7 @@ export default function(initialData) {
 
   this._findRecord = function(collection, id) {
     // If parses, coerce to integer
-    if (typeof id === "string" && allDigitsRegex.test(id)) {
+    if (typeof id === 'string' && allDigitsRegex.test(id)) {
       id = parseInt(id, 10);
     }
 

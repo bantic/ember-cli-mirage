@@ -12,34 +12,32 @@ var Collection = function() {
   this.push.apply(this, args);
 
   this.update = function(key, val) {
-    this.forEach(function(model) {
+    this.forEach((model) => {
       model.update(key, val);
     });
   };
 
   this.destroy = function() {
-    this.forEach(function(model) {
+    this.forEach((model) => {
       model.destroy();
     });
   };
 
   this.save = function() {
-    this.forEach(function(model) {
+    this.forEach((model) => {
       model.save();
     });
   };
 
   this.reload = function() {
-    this.forEach(function(model) {
+    this.forEach((model) => {
       model.reload();
     });
   };
 
   this.mergeCollection = function(collection) {
-    var _this = this;
-
-    collection.forEach(function(model) {
-      _this.push(model);
+    collection.forEach((model) => {
+      this.push(model);
     });
 
     return this;
