@@ -29,6 +29,12 @@ var Collection = function() {
     });
   };
 
+  this.reload = function() {
+    this.forEach(function(model) {
+      model.reload();
+    });
+  };
+
   this.mergeCollection = function(collection) {
     var _this = this;
 

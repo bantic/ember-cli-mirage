@@ -87,7 +87,7 @@ export default function(db) {
 
     if (Ember.isArray(ids)) {
       if (records.length !== ids.length) {
-        throw "Couldn't find all " + pluralize(type) + " with 'ids': (" + ids.join(',') + ") (found " + records.length + " results, but was looking for " + ids.length + ")";
+        throw 'Couldn\'t find all ' + pluralize(type) + ' with ids: (' + ids.join(',') + ') (found ' + records.length + ' results, but was looking for ' + ids.length + ')';
       }
     }
 
@@ -107,7 +107,7 @@ export default function(db) {
   this._collectionForType = function(type) {
     var collection = pluralize(type);
     if (!this.db[collection]) {
-      throw "Mirage: You're trying to find model(s) of type " + type + " but this collection doesn't exist in the database.";
+      throw 'Mirage: You\'re trying to find model(s) of type ' + type + ' but this collection doesn\'t exist in the database.';
     }
 
     return this.db[collection];

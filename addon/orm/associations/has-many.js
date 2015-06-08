@@ -154,13 +154,6 @@ export default Association.extend({
       return child;
     };
 
-    this.updateChildForeignKeys = this._updateChildForeignKeys.bind(this, model, key);
-  },
-
-  _updateChildForeignKeys: function(model, key) {
-    debugger;
-
-    var fk = this.getForeignKey();
-    model[key].update(fk, model.attrs.id);
+    // this.updateChildForeignKeys = this._updateChildForeignKeys.bind(this, model, key);
   }
 });

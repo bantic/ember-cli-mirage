@@ -67,6 +67,8 @@ test('the parent can update its relationship to saved children via child_ids', f
 
   parent.save();
 
+  child1.reload();
+
   assert.deepEqual(child1.user_id, parent.id);
 });
 

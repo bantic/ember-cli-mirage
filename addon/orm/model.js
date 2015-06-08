@@ -93,6 +93,21 @@ Model.prototype.isNew = function() {
   return this.attrs.id === undefined;
 };
 
+/*
+  Reload data from the db
+*/
+Model.prototype.reload = function() {
+  var _this = this;
+  var collection = pluralize(this.type);
+  var attrs = this._schema.db[collection].find(this.id);
+
+  Object.keys(attrs)
+    .filter(function(attr) { return attr !== 'id'; })
+    .forEach(function(attr) {
+      _this[attr] = attrs[attr];
+    });
+};
+
 Model.prototype.addAssociationMethods = function(schema) {
   var _this = this;
 
@@ -134,9 +149,9 @@ Model.prototype._setupAttrs = function(attrs) {
 
   this.attrs = hash;
 
-  // define plain getter/setters for non-fks/non-association keys
-  Object.keys(attrs).forEach(function(attr) {
-    if (_this.fks.indexOf(attr) === -1 && _this.associationKeys.indexOf(attr) === -1 && _this.associationIdKeys.indexOf(attr) === -1) {
+  // define plain getter/setters for non-association keys
+  Object.keys(hash).forEach(function(attr) {
+    if (_this.associationKeys.indexOf(attr) === -1 && _this.associationIdKeys.indexOf(attr) === -1) {
       _this._definePlainAttribute(attr);
     }
   });
@@ -182,9 +197,8 @@ Model.prototype._saveAssociations = function() {
 
   Object.keys(this.hasManyAssociations).forEach(function(key) {
     var association = _this.hasManyAssociations[key];
-
-    _this[key].update(association.getForeignKey(), _this.id);
-    // model[key].update(fk, model.attrs.id);
+    var children = _this[key];
+    children.update(association.getForeignKey(), _this.id);
   });
 };
 
