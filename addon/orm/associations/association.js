@@ -1,9 +1,15 @@
-import extend from 'ember-cli-mirage/utils/extend';
+class Association {
 
-var Association = function(type) {
-  this.type = type;
-};
+  constructor(type) {
+    this.type = type;
 
-Association.extend = extend;
+    // The model type that holds/owns this association
+    this.possessor = '';
+
+    // The model type this association refers to
+    this.referent = '';
+  }
+
+}
 
 export default Association;

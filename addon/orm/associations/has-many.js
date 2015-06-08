@@ -1,26 +1,20 @@
-import { capitalize } from 'ember-cli-mirage/utils/inflector';
 import Association from './association';
+import { capitalize } from 'ember-cli-mirage/utils/inflector';
 
-export default Association.extend({
-
-  // The model type that holds/owns this association
-  possessor: '',
-
-  // The model type this association refers to
-  referent: '',
+class HasMany extends Association {
 
   /*
     The belongsTo association adds a fk to the possessor of the association
   */
-  getForeignKeyArray: function() {
+  getForeignKeyArray() {
     return [this.referent, `${this.possessor}_id`];
-  },
+  }
 
-  getForeignKey: function() {
+  getForeignKey() {
     return `${this.possessor}_id`;
-  },
+  }
 
-  addMethodsToModel: function(model, key, schema) {
+  addMethodsToModel(model, key, schema) {
     this._model = model;
     this._key = key;
 
@@ -155,4 +149,6 @@ export default Association.extend({
 
     // this.updateChildForeignKeys = this._updateChildForeignKeys.bind(this, model, key);
   }
-});
+}
+
+export default HasMany;
