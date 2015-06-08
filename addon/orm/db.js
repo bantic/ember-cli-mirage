@@ -1,7 +1,3 @@
-import Ember from 'ember';
-
-var allDigitsRegex = /^\d+$/;
-
 /*
   The db, an identity map.
 
@@ -9,73 +5,61 @@ var allDigitsRegex = /^\d+$/;
   so the actual db records cannot be inadvertantly
   modified.
 */
-export default function(initialData) {
+class Db {
 
-  this.loadData = function(data) {
-    var _this = this;
+  constructor(initialData) {
+    if (initialData) {
+      this.loadData(initialData);
+    }
+  }
 
-    Ember.keys(data).forEach(function(collection) {
-      _this.createCollection(collection);
-      _this.insert(collection, data[collection]);
-    });
-  };
+  loadData(data) {
+    for (let collection in data) {
+      this.createCollection(collection);
+      this.insert(collection, data[collection]);
+    }
+  }
 
-  this.createCollection = function(collection) {
-    var _this = this;
-
-    this[collection] = {
-      _records: []
-    };
+  createCollection(collection) {
+    this[collection] = { _records: [] };
 
     // Attach the methods to the collection
     // TODO: use prototype?
     ['all', 'insert', 'find', 'where', 'update', 'remove']
-      .forEach(function(method) {
-        _this[collection][method] = _this[method].bind(_this, collection);
+      .forEach((method) => {
+        this[collection][method] = this[method].bind(this, collection);
       });
 
     return this;
-  };
+  }
 
-  this.createCollections = function() {
-    var _this = this;
-    var args = Array.prototype.slice.call(arguments);
+  createCollections(...collections) {
+    collections.forEach( c => this.createCollection(c) );
+  }
 
-    args.forEach(function(collection) {
-      _this.createCollection(collection);
-    });
-  };
-
-  this.emptyData = function() {
-    var _this = this;
-    Object.keys(this).forEach(function(key) {
+  emptyData() {
+    Object.keys(this).forEach((key) => {
       if (key === 'loadData' || key === 'emptyData') {
         return;
       }
 
-      _this[key] = {};
+      this[key] = {};
     });
-  };
+  }
 
-  this.addForeignKey = function(collection, name) {
+  all(collection) {
+    let records = this[collection]._records;
 
-  };
+    return records.map(r => JSON.parse(JSON.stringify(r)) );
+  }
 
-  this.all = function(collection) {
-    var records = this[collection]._records;
-
-    return records.map(function(record) {
-      return JSON.parse(JSON.stringify(record));
-    });
-  };
-
-  this.insert = function(collection, data) {
-    var copy = data ? JSON.parse(JSON.stringify(data)) : {};
-    var records = this[collection]._records;
-    var returnData;
+  insert(collection, data) {
+    let copy = data ? JSON.parse(JSON.stringify(data)) : {};
+    let records = this[collection]._records;
+    let returnData;
 
     if (!_.isArray(copy)) {
-      var attrs = copy;
+      let attrs = copy;
       if (attrs.id === undefined || attrs.id === null) {
         attrs.id = records.length + 1;
       }
@@ -85,60 +69,54 @@ export default function(initialData) {
 
     } else {
       returnData = [];
-      copy.forEach(function(attrs) {
-        if (attrs.id === undefined || attrs.id === null) {
-          attrs.id = records.length + 1;
+      copy.forEach(data => {
+        if (data.id === undefined || data.id === null) {
+          data.id = records.length + 1;
         }
 
-        records.push(attrs);
-        returnData.push(attrs);
-        returnData = returnData.map(function(record) {
-          return JSON.parse(JSON.stringify(record));
-        });
+        records.push(data);
+        returnData.push(data);
+        returnData = returnData.map( r => JSON.parse(JSON.stringify(r)) );
       });
     }
 
     return returnData;
-  };
+  }
 
-  this.find = function(collection, ids) {
+  find(collection, ids) {
     if (_.isArray(ids)) {
-      var records = this._findRecords(collection, ids)
-        .filter(function(record) {
-          return record !== undefined;
-        });
+      let records = this._findRecords(collection, ids)
+        .filter(r => r !== undefined);
 
       // Return a copy
-      return records.map(function(record) {
-        return JSON.parse(JSON.stringify(record));
-      });
+      return records.map(r => JSON.parse(JSON.stringify(r)) );
 
     } else {
-      var record = this._findRecord(collection, ids);
+      let record = this._findRecord(collection, ids);
       if (!record) { return null; }
-      return JSON.parse(JSON.stringify(record)); // return a copy
-    }
-  };
 
-  this.where = function(collection, query) {
-    var records = this._findRecordsWhere(collection, query);
-
-    return records.map(function(record) {
+      // Return a copy
       return JSON.parse(JSON.stringify(record));
-    });
-  };
+    }
+  }
 
-  this.update = function(collection, attrs, target) {
-    var records;
+  where(collection, query) {
+    let records = this._findRecordsWhere(collection, query);
+
+    return records.map( r => JSON.parse(JSON.stringify(r)) );
+  }
+
+  update(collection, attrs, target) {
+    let records;
 
     if (typeof target === 'undefined') {
-      var changedRecords = [];
+      let changedRecords = [];
       this[collection]._records.forEach(function(record) {
-        var oldRecord = _.assign({}, record);
+        let oldRecord = _.assign({}, record);
 
-        Object.keys(attrs).forEach(function(attr) {
+        for (let attr in attrs) {
           record[attr] = attrs[attr];
-        });
+        }
 
         if (!_.isEqual(oldRecord, record)) {
           changedRecords.push(record);
@@ -148,68 +126,68 @@ export default function(initialData) {
       return changedRecords;
 
     } else if (typeof target === 'number' || typeof target === 'string') {
-      var id = target;
-      var record = this._findRecord(collection, id);
+      let id = target;
+      let record = this._findRecord(collection, id);
 
-      Object.keys(attrs).forEach(function(attr) {
+      for (let attr in attrs) {
         record[attr] = attrs[attr];
-      });
+      }
 
       return record;
 
     } else if (_.isArray(target)) {
-      var ids = target;
+      let ids = target;
       records = this._findRecords(collection, ids);
 
-      records.forEach(function(record) {
-        Object.keys(attrs).forEach(function(attr) {
+      records.forEach(record => {
+        for (let attr in attrs) {
           record[attr] = attrs[attr];
-        });
+        }
       });
 
       return records;
 
     } else if (typeof target === 'object') {
-      var query = target;
+      let query = target;
       records = this._findRecordsWhere(collection, query);
 
-      records.forEach(function(record) {
-        Object.keys(attrs).forEach(function(attr) {
+      records.forEach(record => {
+        for (let attr in attrs) {
           record[attr] = attrs[attr];
-        });
+        }
       });
 
       return records;
     }
-  };
+  }
 
-  this.remove = function(collection, target) {
-    var _collection = this[collection];
-    var records;
+  remove(collection, target) {
+    let _collection = this[collection];
+    let records;
 
     if (typeof target === 'undefined') {
       _collection._records = [];
 
     } else if (typeof target === 'number' || typeof target === 'string') {
-      var record = this._findRecord(collection, target);
-      var index = _collection._records.indexOf(record);
+      let record = this._findRecord(collection, target);
+      let index = _collection._records.indexOf(record);
       _collection._records.splice(index, 1);
 
     } else if (_.isArray(target)) {
       records = this._findRecords(collection, target);
-      records.forEach(function(record) {
-        var index = _collection._records.indexOf(record);
+      records.forEach(record =>  {
+        let index = _collection._records.indexOf(record);
         _collection._records.splice(index, 1);
       });
 
     } else if (typeof target === 'object') {
       records = this._findRecordsWhere(collection, target);
-      records.forEach(function(record) {
-        var index = _collection._records.indexOf(record);
+      records.forEach(record =>  {
+        let index = _collection._records.indexOf(record);
         _collection._records.splice(index, 1);
       });
     }
-  };
+  }
 
 
   /*
@@ -219,47 +197,34 @@ export default function(initialData) {
     API query methods return copies.
   */
 
-  this._findRecord = function(collection, id) {
+  _findRecord(collection, id) {
+    let allDigitsRegex = /^\d+$/;
+
     // If parses, coerce to integer
     if (typeof id === 'string' && allDigitsRegex.test(id)) {
       id = parseInt(id, 10);
     }
 
-    var record = this[collection]._records.filter(function(obj) {
-      return obj.id === id;
-    })[0];
+    let record = this[collection]._records.filter(obj => obj.id === id)[0];
 
     return record;
-  };
-
-  this._findRecords = function(collection, ids) {
-    var _this = this;
-
-    var records = ids.map(function(id) {
-      return _this._findRecord(collection, id);
-    });
-
-    return records;
-  };
-
-  this._findRecordsWhere = function(collection, query) {
-    var records = this[collection]._records;
-
-    Object.keys(query).forEach(function(queryKey) {
-      records = records.filter(function(record) {
-        return String(record[queryKey]) === String(query[queryKey]);
-      });
-    });
-
-    return records;
-  };
-
-
-  /*
-    Constructor
-  */
-  if (initialData) {
-    this.loadData(initialData);
   }
 
+  _findRecords(collection, ids) {
+    let records = ids.map(id => this._findRecord(collection, id));
+
+    return records;
+  }
+
+  _findRecordsWhere(collection, query) {
+    let records = this[collection]._records;
+
+    for (let queryKey in query) {
+      records = records.filter( r => String(r[queryKey]) === String(query[queryKey]) );
+    }
+
+    return records;
+  }
 }
+
+export default Db;
