@@ -17,6 +17,10 @@ var Model = function(schema, type, attrs, fks) {
   if (!schema) { throw 'Mirage: A model requires a schema'; }
   if (!type) { throw 'Mirage: A model requires a type'; }
 
+  this.toString = function() {
+    return 'model:' + type;
+  };
+
   this._schema = schema;
   this.type = type;
   this.fks = fks || [];
@@ -27,9 +31,6 @@ var Model = function(schema, type, attrs, fks) {
 
   return this;
 };
-
-Model.prototype.associationKeys = [];    // ex: address.user, user.addresses
-Model.prototype.associationIdKeys = [];  // ex: address.user_id, user.address_ids. may or may not be a fk.
 
 /*
   Create or save the model
@@ -48,9 +49,8 @@ Model.prototype.save = function() {
     this._schema.db[collection].update(this.attrs, this.attrs.id);
   }
 
-  // Update child models who hold a reference
+  // Update associated children
   this._saveAssociations();
-
 
   return this;
 };
@@ -95,6 +95,11 @@ Model.prototype.isNew = function() {
 
 Model.prototype.addAssociationMethods = function(schema) {
   var _this = this;
+
+  this.hasManyAssociations = {};       // a registry of the model's hasMany associations. Key is key from model definition, value is association instance itself
+  this.belongsToAssociations = {};     // a registry of the model's belongsTo associations. Key is key from model definition, value is association instance itself
+  this.associationKeys = [];    // ex: address.user, user.addresses
+  this.associationIdKeys = [];  // ex: address.user_id, user.address_ids. may or may not be a fk.
 
   Object.keys(this.constructor).forEach(function(attr) {
     if (_this.constructor[attr] instanceof Association) {
@@ -173,9 +178,20 @@ Model.prototype._setupRelationships = function(attrs) {
 };
 
 Model.prototype._saveAssociations = function() {
-  // debugger;
+  var _this = this;
+
+  Object.keys(this.hasManyAssociations).forEach(function(key) {
+    var association = _this.hasManyAssociations[key];
+
+    _this[key].update(association.getForeignKey(), _this.id);
+    // model[key].update(fk, model.attrs.id);
+  });
 };
 
 Model.extend = extend.bind(Model, null);
+
+Model.toString = function() {
+  return 'model';
+};
 
 export default Model;

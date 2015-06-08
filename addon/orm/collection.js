@@ -23,6 +23,22 @@ var Collection = function() {
     });
   };
 
+  this.save = function() {
+    this.forEach(function(model) {
+      model.save();
+    });
+  };
+
+  this.mergeCollection = function(collection) {
+    var _this = this;
+
+    collection.forEach(function(model) {
+      _this.push(model);
+    });
+
+    return this;
+  };
+
   return this;
 };
 

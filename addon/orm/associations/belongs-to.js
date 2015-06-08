@@ -24,6 +24,9 @@ export default Association.extend({
     var association = this;
     var foreignKey = this.getForeignKey();
 
+    var associationHash = {};
+    associationHash[key] = this;
+    model.belongsToAssociations = _.assign(model.belongsToAssociations, associationHash);
     model.associationKeys.push(key);
     model.associationIdKeys.push(foreignKey);
 
@@ -42,7 +45,7 @@ export default Association.extend({
       */
       set: function(id) {
         if (id && !schema[association.referent].find(id)) {
-          throw "Couldn't find " + association.referent + " with id = " + id;
+          throw 'Couldn\'t find ' + association.referent + ' with id = ' + id;
         }
 
         this.attrs[foreignKey] = id;

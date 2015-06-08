@@ -21,10 +21,16 @@ export default Association.extend({
   },
 
   addMethodsToModel: function(model, key, schema) {
+    this._model = model;
+    this._key = key;
+
     var association = this;
     var foreignKey = this.getForeignKey();
     var relationshipIdsKey = association.referent + '_ids';
 
+    var associationHash = {};
+    associationHash[key] = this;
+    model.hasManyAssociations = _.assign(model.hasManyAssociations, associationHash);
     model.associationKeys.push(key);
     model.associationIdKeys.push(relationshipIdsKey);
 
@@ -76,15 +82,17 @@ export default Association.extend({
           - returns an array of associated children
       */
       get: function() {
+        var tempModels = association._tempChildren || [];
+
         if (this.isNew()) {
-          var tempModels = association._tempChildren || [];
           return tempModels;
 
         } else {
           var query = {};
           query[foreignKey] = this.id;
+          var savedModels = schema[association.referent].where(query);
 
-          return schema[association.referent].where(query);
+          return savedModels.mergeCollection(tempModels);
         }
 
         // var foreignKeyId = this[foreignKey];
@@ -145,6 +153,14 @@ export default Association.extend({
 
       return child;
     };
-  }
 
+    this.updateChildForeignKeys = this._updateChildForeignKeys.bind(this, model, key);
+  },
+
+  _updateChildForeignKeys: function(model, key) {
+    debugger;
+
+    var fk = this.getForeignKey();
+    model[key].update(fk, model.attrs.id);
+  }
 });

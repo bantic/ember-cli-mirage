@@ -63,11 +63,11 @@ test('the parent can update its relationship to saved children via child_ids', f
   assert.deepEqual(parent.address_ids, [1, 2]);
   assert.equal(parent.addresses.length, 2);
   assert.deepEqual(parent.addresses[0], child1);
-  assert.notDeepEqual(child1.address, parent, 'the child wasnt saved');
+  assert.equal(child1.user_id, null);
 
-  // parent.save();
+  parent.save();
 
-  // assert.deepEqual(child1.address, parent);
+  assert.deepEqual(child1.user_id, parent.id);
 });
 
 // test('the child can update its relationship to a saved parent via parent', function(assert) {
