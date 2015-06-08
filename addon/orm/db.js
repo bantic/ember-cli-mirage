@@ -74,7 +74,7 @@ export default function(initialData) {
     var records = this[collection]._records;
     var returnData;
 
-    if (!Ember.isArray(copy)) {
+    if (!_.isArray(copy)) {
       var attrs = copy;
       if (attrs.id === undefined || attrs.id === null) {
         attrs.id = records.length + 1;
@@ -102,7 +102,7 @@ export default function(initialData) {
   };
 
   this.find = function(collection, ids) {
-    if (Ember.isArray(ids)) {
+    if (_.isArray(ids)) {
       var records = this._findRecords(collection, ids)
         .filter(function(record) {
           return record !== undefined;
@@ -157,7 +157,7 @@ export default function(initialData) {
 
       return record;
 
-    } else if (Ember.isArray(target)) {
+    } else if (_.isArray(target)) {
       var ids = target;
       records = this._findRecords(collection, ids);
 
@@ -195,7 +195,7 @@ export default function(initialData) {
       var index = _collection._records.indexOf(record);
       _collection._records.splice(index, 1);
 
-    } else if (Ember.isArray(target)) {
+    } else if (_.isArray(target)) {
       records = this._findRecords(collection, target);
       records.forEach(function(record) {
         var index = _collection._records.indexOf(record);

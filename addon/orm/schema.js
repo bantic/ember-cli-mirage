@@ -1,4 +1,3 @@
-import Ember from 'ember';
 import { singularize, pluralize } from '../utils/inflector';
 import Collection from './collection';
 import Association from './associations/association';
@@ -85,7 +84,7 @@ export default function(db) {
     var collection = this._collectionForType(type);
     var records = collection.find(ids);
 
-    if (Ember.isArray(ids)) {
+    if (_.isArray(ids)) {
       if (records.length !== ids.length) {
         throw 'Couldn\'t find all ' + pluralize(type) + ' with ids: (' + ids.join(',') + ') (found ' + records.length + ' results, but was looking for ' + ids.length + ')';
       }
@@ -140,7 +139,7 @@ export default function(db) {
   this._hydrate = function(records, type) {
     var _this = this;
 
-    if (Ember.isArray(records)) {
+    if (_.isArray(records)) {
       var models = records.map(function(record) {
         return _this._instantiateModel(type, record);
       });
