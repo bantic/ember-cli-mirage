@@ -248,7 +248,7 @@ test('returns an array of records that match the query', function(assert) {
 });
 
 test('it coerces query params to strings', function(assert) {
-  var result = db.contacts.where({age: "45"});
+  var result = db.contacts.where({age: '45'});
 
   assert.deepEqual(result, [
     {id: 3, name: 'Ganon', evil: true, age: 45}
@@ -259,13 +259,13 @@ test('returns a copy, not a referecne', function(assert) {
   var result = db.contacts.where({evil: true});
 
   assert.deepEqual(result, [
-    {id: 3, name: 'Ganon', evil: true}
+    {id: 3, name: 'Ganon', evil: true, age: 45}
   ]);
 
   result[0].evil = false;
 
   assert.deepEqual(db.contacts.where({evil: true}), [
-    {id: 3, name: 'Ganon', evil: true}
+    {id: 3, name: 'Ganon', evil: true, age: 45}
   ]);
 });
 

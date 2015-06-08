@@ -247,7 +247,7 @@ export default function(initialData) {
 
     Object.keys(query).forEach(function(queryKey) {
       records = records.filter(function(record) {
-        return record[queryKey] === query[queryKey];
+        return String(record[queryKey]) === String(query[queryKey]);
       });
     });
 
