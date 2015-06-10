@@ -148,7 +148,7 @@ test('it does not add ids to array data if present', function(assert) {
 test('it can insert a record with an id of 0', function(assert) {
   db.contacts.insert({id: 0, name: 'Link'});
 
-  assert.deepEqual(db.contacts, [{id: 0, name: 'Link'}]);
+  assert.deepEqual(db.contacts.all(), [{id: 0, name: 'Link'}]);
 });
 
 
