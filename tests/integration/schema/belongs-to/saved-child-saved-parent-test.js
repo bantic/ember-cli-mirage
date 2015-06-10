@@ -4,10 +4,10 @@ import Schema from 'ember-cli-mirage/orm/schema';
 import Db from 'ember-cli-mirage/orm/db';
 import {module, test} from 'qunit';
 
-var schema, db, link, zelda, address;
+var schema, link, zelda, address;
 module('mirage:integration:schema:belongsTo#saved-child-saved-parent', {
   beforeEach: function() {
-    db = new Db({
+    var db = new Db({
       users: [
         {id: 1, name: 'Link'},
         {id: 2, name: 'Zelda'}
