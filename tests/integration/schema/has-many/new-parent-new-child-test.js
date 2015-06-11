@@ -40,6 +40,8 @@ test('the parent can create a new saved child model', function(assert) {
 
   assert.ok(springfield.id, 'the child was persisted');
   assert.equal(springfield.name, '1 Springfield ave');
+  assert.equal(this.parent.addresses.length, 2);
+  assert.deepEqual(this.parent.addresses[1], springfield);
   assert.deepEqual(this.parent.address_ids, [undefined, springfield.id]);
 });
 
@@ -52,8 +54,9 @@ test('the parent can create a new unsaved child model', function(assert) {
 });
 
 // Read
-test('the parent references the model', function(assert) {
-  assert.deepEqual(this.parent.addresses, [this.newChild]);
+test('the parent references its children, and ids are correct', function(assert) {
+  assert.equal(this.parent.addresses.length, 1);
+  assert.deepEqual(this.parent.addresses[0], this.newChild);
   assert.deepEqual(this.parent.address_ids, [undefined]);
 });
 
@@ -67,7 +70,6 @@ test('the parent can update its relationship to saved children via child_ids', f
   assert.equal(this.savedChild1.user_id, null);
 
   this.parent.save();
-
   this.savedChild1.reload();
 
   assert.ok(this.parent.id);

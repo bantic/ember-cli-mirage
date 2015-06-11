@@ -33,12 +33,16 @@ class HasMany extends Association {
           - returns an array of the associated children's ids
       */
       get: function() {
-        if (this.isNew()) {
-          var tempModels = association._tempChildren || [];
-          return tempModels.map(function(child) {return child.id;});
-        } else {
+        var models = association._tempChildren || [];
 
+        if (!this.isNew()) {
+          var query = {[foreignKey]: this.id};
+          var savedModels = schema[association.referent].where(query);
+
+          models = savedModels.mergeCollection(models);
         }
+
+        return models.map(model => model.id);
         // debugger;
 
         // return this[key].map(function(child) { return child.id; });
@@ -51,12 +55,18 @@ class HasMany extends Association {
           - sets the associated parent (via id)
       */
       set: function(ids) {
+        ids = ids || [];
+
         if (this.isNew()) {
           association._tempChildren = schema[association.referent].find(ids);
 
         } else {
-          // var col = schema[association.referent].find(ids);
-          // col.update(foreignKey, this.id);
+          // Set current children's fk to null
+          var query = {[foreignKey]: this.id};
+          schema[association.referent].where(query).update(foreignKey, null);
+
+          // Associate the new childrens to this model
+          schema[association.referent].find(ids).update(foreignKey, this.id);
         }
         // debugger;
         return this;
@@ -105,9 +115,25 @@ class HasMany extends Association {
           - sets the associated children (via array of models)
       */
       set: function(newModels) {
+        newModels = newModels || [];
+
         if (this.isNew()) {
           association._tempChildren = _.compact(newModels);
+
+        } else {
+
+          // Set current children's fk to null
+          var query = {[foreignKey]: this.id};
+          schema[association.referent].where(query).update(foreignKey, null);
+
+          // Save any children that are new
+          newModels.filter(model => model.isNew())
+            .forEach(model => model.save());
+
+          // Associate the new children to this model
+          schema[association.referent].find(newModels.map(m => m.id)).update(foreignKey, this.id);
         }
+
         // if (newModel && newModel.isNew()) {
         //   this[foreignKey] = null;
         //   _this._tempParent = newModel;
@@ -126,6 +152,10 @@ class HasMany extends Association {
         - creates a new unsaved associated child
     */
     model['new' + capitalize(association.referent)] = function(attrs) {
+      if (!this.isNew()) {
+        attrs = _.assign(attrs, {[foreignKey]: this.id});
+      }
+
       var child = schema[association.referent].new(attrs);
 
       association._tempChildren = _.compact(association._tempChildren) || [];
@@ -139,10 +169,16 @@ class HasMany extends Association {
         - creates an associated child, persists directly to db
     */
     model['create' + capitalize(association.referent)] = function(attrs) {
-      var child = schema[association.referent].create(attrs);
+      var child;
 
-      association._tempChildren = _.compact(association._tempChildren) || [];
-      association._tempChildren.push(child);
+      if (this.isNew()) {
+        child = schema[association.referent].create(attrs);
+        association._tempChildren = _.compact(association._tempChildren) || [];
+        association._tempChildren.push(child);
+      } else {
+        attrs = _.assign(attrs, {[foreignKey]: this.id});
+        child = schema[association.referent].create(attrs);
+      }
 
       return child;
     };
