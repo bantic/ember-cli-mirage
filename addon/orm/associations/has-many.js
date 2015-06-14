@@ -1,10 +1,11 @@
 import Association from './association';
+import Collection from '../collection';
 import { capitalize } from 'ember-cli-mirage/utils/inflector';
 
 class HasMany extends Association {
 
   /*
-    The belongsTo association adds a fk to the possessor of the association
+    The hasMany association adds a fk to the referent of the association
   */
   getForeignKeyArray() {
     return [this.referent, `${this.possessor}_id`];
@@ -33,7 +34,7 @@ class HasMany extends Association {
           - returns an array of the associated children's ids
       */
       get: function() {
-        var models = association._tempChildren || [];
+        var models = association._cachedChildren || [];
 
         if (!this.isNew()) {
           var query = {[foreignKey]: this.id};
@@ -58,7 +59,7 @@ class HasMany extends Association {
         ids = ids || [];
 
         if (this.isNew()) {
-          association._tempChildren = schema[association.referent].find(ids);
+          association._cachedChildren = schema[association.referent].find(ids);
 
         } else {
           // Set current children's fk to null
@@ -67,6 +68,9 @@ class HasMany extends Association {
 
           // Associate the new childrens to this model
           schema[association.referent].find(ids).update(foreignKey, this.id);
+
+          // Clear out any old cached children
+          association._cachedChildren = [];
         }
         // debugger;
         return this;
@@ -85,7 +89,7 @@ class HasMany extends Association {
           - returns an array of associated children
       */
       get: function() {
-        var tempModels = association._tempChildren || [];
+        var tempModels = association._cachedChildren || [];
 
         if (this.isNew()) {
           return tempModels;
@@ -111,14 +115,14 @@ class HasMany extends Association {
       },
 
       /*
-        object.children = (childModels)
+        object.children = [model1, model2, ...]
           - sets the associated children (via array of models)
       */
       set: function(newModels) {
-        newModels = newModels || [];
+        newModels = newModels ? _.compact(newModels) : [];
 
         if (this.isNew()) {
-          association._tempChildren = _.compact(newModels);
+          association._cachedChildren = newModels instanceof Collection ? newModels : new Collection(newModels);
 
         } else {
 
@@ -132,6 +136,9 @@ class HasMany extends Association {
 
           // Associate the new children to this model
           schema[association.referent].find(newModels.map(m => m.id)).update(foreignKey, this.id);
+
+          // Clear out any old cached children
+          association._cachedChildren = [];
         }
 
         // if (newModel && newModel.isNew()) {
@@ -158,8 +165,8 @@ class HasMany extends Association {
 
       var child = schema[association.referent].new(attrs);
 
-      association._tempChildren = _.compact(association._tempChildren) || [];
-      association._tempChildren.push(child);
+      association._cachedChildren = association._cachedChildren || new Collection();
+      association._cachedChildren.push(child);
 
       return child;
     };
@@ -171,13 +178,15 @@ class HasMany extends Association {
     model['create' + capitalize(association.referent)] = function(attrs) {
       var child;
 
-      if (this.isNew()) {
-        child = schema[association.referent].create(attrs);
-        association._tempChildren = _.compact(association._tempChildren) || [];
-        association._tempChildren.push(child);
-      } else {
+      if (!this.isNew()) {
         attrs = _.assign(attrs, {[foreignKey]: this.id});
-        child = schema[association.referent].create(attrs);
+      }
+
+      child = schema[association.referent].create(attrs);
+
+      if (this.isNew()) {
+        association._cachedChildren = _.compact(association._cachedChildren) || [];
+        association._cachedChildren.push(child);
       }
 
       return child;

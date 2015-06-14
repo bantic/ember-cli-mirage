@@ -4,10 +4,12 @@ import Schema from 'ember-cli-mirage/orm/schema';
 import Db from 'ember-cli-mirage/orm/db';
 import {module, test} from 'qunit';
 
-module('mirage:integration:schema:hasMany#new-parent-new-child', {
+module('mirage:integration:schema:hasMany#saved-parent-new-child', {
   beforeEach: function() {
     var db = new Db({
-      users: [],
+      users: [
+        {id: 1, name: 'Link'},
+      ],
       addresses: [
         {id: 1, name: '123 Hyrule Way'},
         {id: 2, name: '12 Goron City'},
@@ -25,12 +27,8 @@ module('mirage:integration:schema:hasMany#new-parent-new-child', {
       address: Address
     });
 
-    this.savedChild1 = this.schema.address.find(1);
-    this.savedChild2 = this.schema.address.find(2);
-
-    this.newChild = this.schema.address.new({name: '99 Way'});
-
-    this.parent = this.schema.user.new({addresses: [this.newChild]});
+    this.parent = this.schema.user.find(1);
+    this.newChild = this.parent.newAddress({name: 'newAddr'});
   }
 });
 
@@ -40,9 +38,11 @@ test('the parent can create a new saved child model', function(assert) {
 
   assert.ok(springfield.id, 'the child was persisted');
   assert.equal(springfield.name, '1 Springfield ave');
+  assert.equal(springfield.user_id, 1);
   assert.equal(this.parent.addresses.length, 2);
-  assert.deepEqual(this.parent.addresses[1], springfield);
-  assert.deepEqual(this.parent.address_ids, [undefined, springfield.id]);
+  assert.deepEqual(this.parent.addresses[0], springfield);
+  assert.deepEqual(this.parent.addresses[1], this.newChild);
+  assert.deepEqual(this.parent.address_ids, [springfield.id, undefined]);
 });
 
 test('the parent can create a new unsaved child model', function(assert) {
@@ -50,6 +50,9 @@ test('the parent can create a new unsaved child model', function(assert) {
 
   assert.ok(!hudson.id, 'the child was not persisted');
   assert.equal(hudson.name, '2 Hudson st');
+  assert.equal(hudson.user_id, 1);
+  assert.equal(this.parent.addresses.length, 2);
+  assert.deepEqual(this.parent.addresses[1], hudson);
   assert.deepEqual(this.parent.address_ids, [undefined, undefined]);
 });
 
@@ -62,34 +65,31 @@ test('the parent references its children, and ids are correct', function(assert)
 
 // Update
 test('the parent can update its relationship to saved children via child_ids', function(assert) {
+  var unrelatedChild1 = this.schema.address.find(1);
+  var unrelatedChild2 = this.schema.address.find(2);
+
   this.parent.address_ids = [1, 2];
+  unrelatedChild1.reload();
+  unrelatedChild2.reload();
 
   assert.deepEqual(this.parent.address_ids, [1, 2]);
   assert.equal(this.parent.addresses.length, 2);
-  assert.deepEqual(this.parent.addresses[0], this.savedChild1);
-  assert.equal(this.savedChild1.user_id, null);
-
-  this.parent.save();
-  this.savedChild1.reload();
-
-  assert.ok(this.parent.id);
-  assert.deepEqual(this.savedChild1.user_id, this.parent.id);
+  assert.deepEqual(this.parent.addresses[0], unrelatedChild1);
+  assert.deepEqual(this.parent.addresses[1], unrelatedChild2);
 });
 
 test('the parent can update its relationship to saved children via .children', function(assert) {
-  this.parent.addresses = [this.savedChild1, this.savedChild2];
+  var unrelatedChild1 = this.schema.address.find(1);
+  var unrelatedChild2 = this.schema.address.find(2);
+
+  this.parent.addresses = [unrelatedChild1, unrelatedChild2];
+  unrelatedChild1.reload();
+  unrelatedChild2.reload();
 
   assert.deepEqual(this.parent.address_ids, [1, 2]);
   assert.equal(this.parent.addresses.length, 2);
-  assert.deepEqual(this.parent.addresses[0], this.savedChild1);
-  assert.equal(this.savedChild1.user_id, null);
-
-  this.parent.save();
-
-  this.savedChild1.reload();
-
-  assert.ok(this.parent.id);
-  assert.deepEqual(this.savedChild1.user_id, this.parent.id);
+  assert.deepEqual(this.parent.addresses[0], unrelatedChild1);
+  assert.deepEqual(this.parent.addresses[1], unrelatedChild2);
 });
 
 test('the parent can update its relationship to new children via .children', function(assert) {
@@ -97,40 +97,29 @@ test('the parent can update its relationship to new children via .children', fun
   var newChild2 = this.schema.address.new({name: '2b'});
 
   this.parent.addresses = [newChild1, newChild2];
+  newChild1.reload();
+  newChild2.reload();
 
-  assert.deepEqual(this.parent.address_ids, [undefined, undefined]);
+  assert.ok(newChild1.id, 'the new child was saved');
+  assert.deepEqual(this.parent.address_ids, [newChild1.id, newChild2.id]);
   assert.equal(this.parent.addresses.length, 2);
   assert.deepEqual(this.parent.addresses[0], newChild1);
-  assert.equal(newChild1.user_id, null);
-
-  this.parent.save();
-
-  newChild1.reload();
-
-  assert.ok(this.parent.id);
-  assert.deepEqual(newChild1.user_id, this.parent.id);
+  assert.deepEqual(this.parent.addresses[1], newChild2);
 });
 
 test('the parent can update its relationship to a mix of new and saved children via .children', function(assert) {
-  var anotherNewChild = this.schema.address.new({name: '1a'});
+  var unrelatedChild = this.schema.address.find(1);
+  var newChild = this.schema.address.new({name: 'abc'});
 
-  this.parent.addresses = [anotherNewChild, this.savedChild1];
+  this.parent.addresses = [unrelatedChild, newChild];
+  unrelatedChild.reload();
+  newChild.reload();
 
-  assert.deepEqual(this.parent.address_ids, [undefined, 1]);
+  assert.ok(newChild.id, 'the new child was saved');
+  assert.deepEqual(this.parent.address_ids, [unrelatedChild.id, newChild.id]);
   assert.equal(this.parent.addresses.length, 2);
-  assert.deepEqual(this.parent.addresses[0], anotherNewChild);
-  assert.deepEqual(this.parent.addresses[1], this.savedChild1);
-  assert.equal(anotherNewChild.user_id, null);
-  assert.equal(this.savedChild1.user_id, null);
-
-  this.parent.save();
-
-  anotherNewChild.reload();
-  this.savedChild1.reload();
-
-  assert.ok(this.parent.id);
-  assert.deepEqual(anotherNewChild.user_id, this.parent.id);
-  assert.deepEqual(this.savedChild1.user_id, this.parent.id);
+  assert.deepEqual(this.parent.addresses[0], unrelatedChild);
+  assert.deepEqual(this.parent.addresses[1], newChild);
 });
 
 test('the parent can clear its relationship via children', function(assert) {
