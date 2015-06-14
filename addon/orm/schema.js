@@ -30,8 +30,8 @@ export default function(db) {
       if (ModelClass[key] instanceof Association) {
         var association = ModelClass[key];
         var associatedType = association.type || singularize(key);
-        association.possessor = type;
-        association.referent = associatedType;
+        association.owner = type;
+        association.target = associatedType;
 
         // Update the registry with this association's foreign keys
         var result = association.getForeignKeyArray();

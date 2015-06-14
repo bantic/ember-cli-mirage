@@ -4,14 +4,14 @@ import { capitalize } from 'ember-cli-mirage/utils/inflector';
 class BelongsTo extends Association {
 
   /*
-    The belongsTo association adds a fk to the possessor of the association
+    The belongsTo association adds a fk to the owner of the association
   */
   getForeignKeyArray() {
-    return [this.possessor, `${this.referent}_id`];
+    return [this.owner, `${this.target}_id`];
   }
 
   getForeignKey() {
-    return `${this.referent}_id`;
+    return `${this.target}_id`;
   }
 
   addMethodsToModel(model, key, schema) {
@@ -38,8 +38,8 @@ class BelongsTo extends Association {
           - sets the associated parent (via id)
       */
       set: function(id) {
-        if (id && !schema[association.referent].find(id)) {
-          throw 'Couldn\'t find ' + association.referent + ' with id = ' + id;
+        if (id && !schema[association.target].find(id)) {
+          throw 'Couldn\'t find ' + association.target + ' with id = ' + id;
         }
 
         this.attrs[foreignKey] = id;
@@ -56,7 +56,7 @@ class BelongsTo extends Association {
         var foreignKeyId = this[foreignKey];
         if (foreignKeyId) {
           association._tempParent = null;
-          return schema[association.referent].find(foreignKeyId);
+          return schema[association.target].find(foreignKeyId);
 
         } else if (association._tempParent) {
           return association._tempParent;
