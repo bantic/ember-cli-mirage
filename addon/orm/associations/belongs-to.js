@@ -97,7 +97,8 @@ class BelongsTo extends Association {
 
     /*
       object.createParent
-        - creates an associated parent, persists directly to db
+        - creates an associated parent, persists directly to db,
+          and updates the owner's foreign key
     */
     model['create' + capitalize(key)] = function(attrs) {
       var parent = schema[key].create(attrs);

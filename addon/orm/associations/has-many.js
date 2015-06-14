@@ -173,7 +173,8 @@ class HasMany extends Association {
 
     /*
       object.createChild
-        - creates an associated child, persists directly to db
+        - creates an associated child, persists directly to db, and
+          updates the target's foreign key
     */
     model['create' + capitalize(association.target)] = function(attrs) {
       var child;

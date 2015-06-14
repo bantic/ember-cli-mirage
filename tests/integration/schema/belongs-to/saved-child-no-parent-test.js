@@ -27,15 +27,6 @@ module('mirage:integration:schema:belongsTo#saved-child-no-parent', {
 });
 
 // Create
-test('the child can create a new saved parent', function(assert) {
-  var ganon = address.createUser({name: 'Ganon'});
-
-  assert.ok(ganon.id, 'the parent was persisted');
-  assert.deepEqual(address.user, ganon);
-  assert.equal(address.user_id, ganon.id);
-  assert.deepEqual(address.attrs, {id: 1, user_id: ganon.id});
-});
-
 test('the child can create a new unsaved parent', function(assert) {
   var ganon = address.newUser({name: 'Ganon'});
 
