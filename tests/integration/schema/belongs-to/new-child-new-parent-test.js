@@ -28,13 +28,6 @@ module('mirage:integration:schema:belongsTo#new-child-new-parent', {
 });
 
 
-// Read
-test('the child references the model, and its attrs has a null foreign key', function(assert) {
-  assert.deepEqual(address.user, zelda);
-  assert.equal(address.user_id, null);
-  assert.deepEqual(address.attrs, {user_id: null});
-});
-
 // Update
 test('the child can update its relationship to a saved parent via parent_id', function(assert) {
   address.user_id = 1;

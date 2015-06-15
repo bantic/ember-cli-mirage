@@ -1,23 +1,9 @@
-import Mirage from 'ember-cli-mirage';
-import Model from 'ember-cli-mirage/orm/model';
-import Schema from 'ember-cli-mirage/orm/schema';
-import Db from 'ember-cli-mirage/orm/db';
+import BelongsToHelper from './belongs-to-helper';
 import {module, test} from 'qunit';
 
 module('mirage:integration:schema:belongsTo#accessor', {
   beforeEach: function() {
-    this.db = new Db();
-    this.schema = new Schema(this.db);
-
-    var User = Model;
-    var Address = Model.extend({
-      user: Mirage.belongsTo()
-    });
-
-    this.schema.registerModels({
-      user: User,
-      address: Address
-    });
+    this.helper = new BelongsToHelper();
   }
 });
 
@@ -26,78 +12,43 @@ module('mirage:integration:schema:belongsTo#accessor', {
 */
 
 test('a saved child with no parent', function(assert) {
-  this.db.loadData({
-    users: [],
-    addresses: [
-      {id: 1, name: 'foo'},
-    ]
-  });
-  var address = this.schema.address.find(1);
+  var address = this.helper.savedChildNoParent();
 
   assert.equal(address.user, null);
+  assert.equal(address.user_id, null);
 });
 
 test('a saved child with a new parent', function(assert) {
-  this.db.loadData({
-    users: [],
-    addresses: [
-      {id: 1, name: 'foo'},
-    ]
-  });
-  var address = this.schema.address.find(1);
-  var newUser = this.schema.user.new({name: 'Newbie'});
-  address.user = newUser;
+  var [address, user] = this.helper.savedChildNewParent();
 
-  assert.deepEqual(address.user, newUser);
+  assert.deepEqual(address.user, user);
+  assert.deepEqual(address.user_id, null);
 });
 
 test('a saved child with a saved parent', function(assert) {
-  this.db.loadData({
-    users: [
-      {id: 1, name: 'some user'},
-    ],
-    addresses: [
-      {id: 1, name: 'foo', user_id: 1},
-    ]
-  });
-  var address = this.schema.address.find(1);
-  var user = this.schema.user.find(1);
+  var [address, user] = this.helper.savedChildSavedParent();
 
   assert.deepEqual(address.user, user);
+  assert.equal(address.user_id, user.id);
 });
 
 test('a new child with no parent', function(assert) {
-  this.db.loadData({
-    users: [],
-    addresses: []
-  });
-  var address = this.schema.address.new({name: 'New addr'});
+  var address = this.helper.newChildNoParent();
 
   assert.deepEqual(address.user, null);
+  assert.deepEqual(address.user_id, null);
 });
 
 test('a new child with a new parent', function(assert) {
-  this.db.loadData({
-    users: [],
-    addresses: []
-  });
-  var address = this.schema.address.new({name: 'New addr'});
-  var newUser = this.schema.user.new({name: 'Newbie'});
-  address.user = newUser;
+  var [address, newUser] = this.helper.newChildNewParent();
 
   assert.deepEqual(address.user, newUser);
+  assert.deepEqual(address.user_id, null);
 });
 
 test('a new child with a saved parent', function(assert) {
-  this.db.loadData({
-    users: [
-      {id: 1, name: 'some user'}
-    ],
-    addresses: []
-  });
-  var address = this.schema.address.new({name: 'New addr'});
-  var savedUser = this.schema.user.find(1);
-  address.user = savedUser;
+  var [address, savedUser] = this.helper.newChildSavedParent();
 
   assert.deepEqual(address.user, savedUser);
+  assert.deepEqual(address.user_id, 1);
 });

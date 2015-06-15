@@ -31,13 +31,6 @@ module('mirage:integration:schema:belongsTo#saved-child-saved-parent', {
 });
 
 
-// Read
-test('the child references the model, and its foreign key is correct', function(assert) {
-  assert.deepEqual(address.user, link);
-  assert.equal(address.user_id, 1);
-  assert.deepEqual(address.attrs, {id: 1, user_id: 1});
-});
-
 // Update
 test('the child can update its relationship to a saved parent via parent_id', function(assert) {
   address.user_id = 2;
