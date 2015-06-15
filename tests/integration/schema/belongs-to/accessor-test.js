@@ -66,51 +66,38 @@ test('a saved child with a saved parent', function(assert) {
   assert.deepEqual(address.user, user);
 });
 
-// test('a new child with no parent', function(assert) {
-//   this.db.loadData({
-//     users: [],
-//     addresses: []
-//   });
-//   var address = this.schema.address.new({name: 'New addr'});
+test('a new child with no parent', function(assert) {
+  this.db.loadData({
+    users: [],
+    addresses: []
+  });
+  var address = this.schema.address.new({name: 'New addr'});
 
-//   var ganon = address.newUser({name: 'Ganon'});
+  assert.deepEqual(address.user, null);
+});
 
-//   assert.ok(!ganon.id, 'the parent was not persisted');
-//   assert.deepEqual(address.user, ganon);
-//   assert.equal(address.user_id, null);
-//   assert.deepEqual(address.attrs, {name: 'New addr', user_id: null});
-// });
+test('a new child with a new parent', function(assert) {
+  this.db.loadData({
+    users: [],
+    addresses: []
+  });
+  var address = this.schema.address.new({name: 'New addr'});
+  var newUser = this.schema.user.new({name: 'Newbie'});
+  address.user = newUser;
 
-// test('a new child with a new parent', function(assert) {
-//   this.db.loadData({
-//     users: [],
-//     addresses: []
-//   });
-//   var address = this.schema.address.new({name: 'New addr'});
-//   address.user = this.schema.user.new({name: 'Newbie'});
+  assert.deepEqual(address.user, newUser);
+});
 
-//   var ganon = address.newUser({name: 'Ganon'});
+test('a new child with a saved parent', function(assert) {
+  this.db.loadData({
+    users: [
+      {id: 1, name: 'some user'}
+    ],
+    addresses: []
+  });
+  var address = this.schema.address.new({name: 'New addr'});
+  var savedUser = this.schema.user.find(1);
+  address.user = savedUser;
 
-//   assert.ok(!ganon.id, 'the parent was not persisted');
-//   assert.deepEqual(address.user, ganon);
-//   assert.equal(address.user_id, null);
-//   assert.deepEqual(address.attrs, {name: 'New addr', user_id: null});
-// });
-
-// test('a new child with a saved parent', function(assert) {
-//   this.db.loadData({
-//     users: [
-//       {id: 1, name: 'some user'}
-//     ],
-//     addresses: []
-//   });
-//   var address = this.schema.address.new({name: 'New addr'});
-//   address.user = this.schema.user.find(1);
-
-//   var ganon = address.newUser({name: 'Ganon'});
-
-//   assert.ok(!ganon.id, 'the parent was not persisted');
-//   assert.deepEqual(address.user, ganon);
-//   assert.equal(address.user_id, null);
-//   assert.deepEqual(address.attrs, {name: 'New addr', user_id: null});
-// });
+  assert.deepEqual(address.user, savedUser);
+});
