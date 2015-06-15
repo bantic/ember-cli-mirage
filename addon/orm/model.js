@@ -193,12 +193,20 @@ Model.prototype._setupRelationships = function(attrs) {
 };
 
 Model.prototype._saveAssociations = function() {
-  var _this = this;
+  Object.keys(this.belongsToAssociations).forEach(key => {
+    var association = this.belongsToAssociations[key];
+    var parent = this[key];
+    if (parent.isNew()) {
+      var fk = association.getForeignKey();
+      parent.save();
+      this.update(fk, parent.id);
+    }
+  });
 
-  Object.keys(this.hasManyAssociations).forEach(function(key) {
-    var association = _this.hasManyAssociations[key];
-    var children = _this[key];
-    children.update(association.getForeignKey(), _this.id);
+  Object.keys(this.hasManyAssociations).forEach(key => {
+    var association = this.hasManyAssociations[key];
+    var children = this[key];
+    children.update(association.getForeignKey(), this.id);
   });
 };
 

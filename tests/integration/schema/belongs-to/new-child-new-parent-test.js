@@ -27,15 +27,6 @@ module('mirage:integration:schema:belongsTo#new-child-new-parent', {
   }
 });
 
-// Create
-test('the child can create a new unsaved parent model', function(assert) {
-  var ganon = address.newUser({name: 'Ganon'});
-
-  assert.ok(!ganon.id, 'the parent was not persisted');
-  assert.deepEqual(address.user, ganon);
-  assert.equal(address.user_id, null);
-  assert.deepEqual(address.attrs, {user_id: null});
-});
 
 // Read
 test('the child references the model, and its attrs has a null foreign key', function(assert) {
