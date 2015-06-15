@@ -1,7 +1,7 @@
 import BelongsToHelper from './belongs-to-helper';
 import {module, test} from 'qunit';
 
-module('mirage:integration:schema:belongsTo#setAssociation', {
+module('mirage:integration:schema:belongsTo#setAssociationId', {
   beforeEach: function() {
     this.helper = new BelongsToHelper();
   }
@@ -20,33 +20,31 @@ module('mirage:integration:schema:belongsTo#setAssociation', {
   'newChildSavedParent',
 ].forEach(state => {
 
-  test(`a ${state} can update its association to a saved parent`, function(assert) {
+  test(`a ${state} can update its association to a saved parent via parent_id`, function(assert) {
     var [address] = this.helper[state]();
     var savedUser = this.helper.savedParent();
 
-    address.user = savedUser;
+    address.user_id = savedUser.id;
 
     assert.equal(address.user_id, savedUser.id);
     assert.deepEqual(address.user, savedUser);
   });
 
-  test(`a ${state} can update its association to a new parent`, function(assert) {
-    var [address] = this.helper[state]();
-    var newUser = this.helper.newParent();
+});
 
-    address.user = newUser;
+[
+  'savedChildSavedParent',
+  'newChildSavedParent',
+].forEach(state => {
 
-    assert.equal(address.user_id, null);
-    assert.deepEqual(address.user, newUser);
-  });
-
-  test(`a ${state} can update its association to a null parent`, function(assert) {
+  test(`a ${state} can clear its association via a null parent_id`, function(assert) {
     var [address] = this.helper[state]();
 
-    address.user = null;
+    address.user_id = null;
 
     assert.equal(address.user_id, null);
     assert.deepEqual(address.user, null);
   });
 
 });
+

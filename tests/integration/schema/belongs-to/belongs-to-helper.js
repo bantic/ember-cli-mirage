@@ -6,7 +6,10 @@ import Db from 'ember-cli-mirage/orm/db';
 class BelongsToHelper {
 
   constructor() {
-    this.db = new Db();
+    this.db = new Db({
+      users: [],
+      addresses: []
+    });
     this.schema = new Schema(this.db);
 
     var User = Model;
@@ -20,24 +23,21 @@ class BelongsToHelper {
     });
   }
 
-  savedChildNoParent() {
-    this.db.loadData({
-      users: [],
-      addresses: [
-        {id: 1, name: 'foo'},
-      ]
-    });
+  /*
+    These methods return a child in various states. The return
+    value is an array, [child, parent], where `parent` is
+    sometimes undefined.
+  */
 
-    return this.schema.address.find(1);
+  savedChildNoParent() {
+    this.db.addresses.insert({id: 1, name: 'foo'});
+
+    return [this.schema.address.find(1), undefined];
   }
 
   savedChildNewParent() {
-    this.db.loadData({
-      users: [],
-      addresses: [
-        {id: 1, name: 'foo'},
-      ]
-    });
+    this.db.addresses.insert({id: 1, name: 'foo'});
+
     var address = this.schema.address.find(1);
     var user = this.schema.user.new({name: 'Newbie'});
     address.user = user;
@@ -46,14 +46,9 @@ class BelongsToHelper {
   }
 
   savedChildSavedParent() {
-    this.db.loadData({
-      users: [
-        {id: 1, name: 'some user'},
-      ],
-      addresses: [
-        {id: 1, name: 'foo', user_id: 1},
-      ]
-    });
+    this.db.users.insert({id: 1, name: 'some user'});
+    this.db.addresses.insert({id: 1, name: 'foo', user_id: 1});
+
     var address = this.schema.address.find(1);
     var user = this.schema.user.find(1);
 
@@ -61,19 +56,10 @@ class BelongsToHelper {
   }
 
   newChildNoParent() {
-    this.db.loadData({
-      users: [],
-      addresses: []
-    });
-
-    return this.schema.address.new({name: 'New addr'});
+    return [this.schema.address.new({name: 'New addr'}), undefined];
   }
 
   newChildNewParent() {
-    this.db.loadData({
-      users: [],
-      addresses: []
-    });
     var address = this.schema.address.new({name: 'New addr'});
     var newUser = this.schema.user.new({name: 'Newbie'});
     address.user = newUser;
@@ -82,17 +68,25 @@ class BelongsToHelper {
   }
 
   newChildSavedParent() {
-    this.db.loadData({
-      users: [
-        {id: 1, name: 'some user'}
-      ],
-      addresses: []
-    });
+    this.db.users.insert({id: 1, name: 'some user'});
+
     var address = this.schema.address.new({name: 'New addr'});
     var savedUser = this.schema.user.find(1);
     address.user = savedUser;
 
     return [address, savedUser];
+  }
+
+  // Just a saved unassociated parent. The id is high so as not to
+  // interfere with any other parents
+  savedParent() {
+    this.db.users.insert({id: 100, name: 'bar'});
+
+    return this.schema.user.find(100);
+  }
+
+  newParent() {
+    return this.schema.user.new({name: 'Newbie'});
   }
 
 }

@@ -12,7 +12,7 @@ module('mirage:integration:schema:belongsTo#accessor', {
 */
 
 test('a saved child with no parent', function(assert) {
-  var address = this.helper.savedChildNoParent();
+  var [address] = this.helper.savedChildNoParent();
 
   assert.equal(address.user, null);
   assert.equal(address.user_id, null);
@@ -33,7 +33,7 @@ test('a saved child with a saved parent', function(assert) {
 });
 
 test('a new child with no parent', function(assert) {
-  var address = this.helper.newChildNoParent();
+  var [address] = this.helper.newChildNoParent();
 
   assert.deepEqual(address.user, null);
   assert.deepEqual(address.user_id, null);
