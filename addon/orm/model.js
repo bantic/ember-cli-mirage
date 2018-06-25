@@ -20,6 +20,11 @@ import _assign from 'lodash/assign';
 /*
   Constructor
 */
+
+window.Xconstructorcounts = {};
+window.X2 = {};
+
+
 class Model {
 
   // TODO: schema and modelName now set statically at registration, need to remove
@@ -32,8 +37,12 @@ class Model {
     this.fks = fks || [];
     attrs = attrs || {};
 
+    let now = new Date();
     this._setupAttrs(attrs);
     this._setupRelationships(attrs);
+    window.Xconstructorcounts[modelName] = (window.Xconstructorcounts[modelName] || 0) + 1;
+    window.X2[modelName] = window.X2[modelName] || {};
+    window.X2[modelName][attrs.id] = (window.X2[modelName][attrs.id] || 0 ) + 1;
 
     return this;
   }

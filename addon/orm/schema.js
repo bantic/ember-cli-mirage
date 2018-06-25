@@ -140,7 +140,10 @@ export default class Schema {
    * @public
    */
   create(type, attrs) {
-    return this.new(type, attrs).save();
+    this._hydrationMap = this._hydrationMap || {};
+    let result = this.new(type, attrs).save();
+    this._hydrationMap = {};
+    return result;
   }
 
   /**
@@ -346,15 +349,27 @@ export default class Schema {
    * @private
    */
   _hydrate(records, modelName) {
+    this._hydrationMap = this._hydrationMap || {};
+    this._hydrationMap[modelName] = this._hydrationMap[modelName] || {};
+    let result;
     if (Array.isArray(records)) {
       let models = records.map(function(record) {
-        return this._instantiateModel(modelName, record);
+        if (!this._hydrationMap[modelName][record.id]) {
+          this._hydrationMap[modelName][record.id] = this._instantiateModel(modelName, record);
+        }
+        return this._hydrationMap[modelName][record.id];
       }, this);
-      return new Collection(modelName, models);
+      result = new Collection(modelName, models);
     } else if (records) {
-      return this._instantiateModel(modelName, records);
+      if (!this._hydrationMap[modelName][records.id]) {
+        this._hydrationMap[modelName][records.id] = this._instantiateModel(modelName, records);
+      }
+      result = this._hydrationMap[modelName][records.id];
     } else {
-      return null;
+      result = null;
     }
+
+    // this._hydrationMap = {};
+    return result;
   }
 }
