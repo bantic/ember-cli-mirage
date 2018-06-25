@@ -23,6 +23,7 @@ class DbCollection {
     this.name = name;
     this._records = [];
     this.identityManager = new IdentityManager();
+    this._identityMap = {};
 
     if (initialData) {
       this.insert(initialData);
@@ -217,17 +218,21 @@ class DbCollection {
     if (typeof target === 'undefined') {
       this._records = [];
       this.identityManager.reset();
+      this._identityMap = {};
 
     } else if (typeof target === 'number' || typeof target === 'string') {
       let record = this._findRecord(target);
       let index = this._records.indexOf(record);
       this._records.splice(index, 1);
+      delete this._identityMap[record.id];
 
     } else if (Array.isArray(target)) {
       records = this._findRecords(target);
       records.forEach((record) =>  {
         let index = this._records.indexOf(record);
         this._records.splice(index, 1);
+        delete this._identityMap[record.id];
+
       });
 
     } else if (typeof target === 'object') {
@@ -235,6 +240,8 @@ class DbCollection {
       records.forEach((record) =>  {
         let index = this._records.indexOf(record);
         this._records.splice(index, 1);
+        delete this._identityMap[record.id];
+
       });
     }
   }
@@ -253,10 +260,17 @@ class DbCollection {
    */
   _findRecord(id) {
     id = id.toString();
+    if (this._identityMap[id]) {
+      return this._identityMap[id];
+    } else {
+      let [record] = this._records.filter((obj) => obj.id === id);
+      if (record) {
+        throw new Error('found record by fiter but not by identity map');
+      }
 
-    let [record] = this._records.filter((obj) => obj.id === id);
+      return record;
+    }
 
-    return record;
   }
 
   /**
@@ -315,6 +329,7 @@ class DbCollection {
     }
 
     this._records.push(attrs);
+    this._identityMap[attrs.id] = attrs;
 
     return duplicate(attrs);
   }

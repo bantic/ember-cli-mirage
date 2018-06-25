@@ -23,6 +23,7 @@ module.exports = {
 
   included() {
     let app;
+    console.log('XXX MY ember-cli-mirage!');
 
     // If the addon has the _findHost() method (in ember-cli >= 2.7.0), we'll just
     // use that.
